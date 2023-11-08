@@ -104,21 +104,21 @@ class AnswerPage extends StatelessWidget {
     question_index = state?.question_index;
     var image = Image.asset('assets/images/circle.png');
     print("x: " + x.value.toString() + " y: " + y.value.toString());
-    return GestureDetector(
-      // store the position of the tap
-      onTapDown: (details) {
-        // translate to local position
-        final RenderBox box = context.findRenderObject() as RenderBox;
-        final Offset localOffset = box.globalToLocal(details.globalPosition);
-        x.value = localOffset.dx;
-        y.value = localOffset.dy;
-        print("x: " + x.value.toString() + " y: " + y.value.toString());
-        
-      },
-      child: CustomPaint(
-        child: image,
-        foregroundPainter: CirclePainter(x, y),
-      ),
+    return InteractiveViewer(
+      constrained: false,
+      child: GestureDetector(
+        // store the position of the tap
+        onTapDown: (details) {
+          x.value = details.localPosition.dx;
+          y.value = details.localPosition.dy;
+          print("x: " + x.value.toString() + " y: " + y.value.toString());
+          
+        },
+        child: CustomPaint(
+          child: image,
+          foregroundPainter: CirclePainter(x, y),
+        ),
+      )
     );
   }
 }
