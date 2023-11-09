@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hku_guesser/game.dart';
 import 'constants.dart';
 
 void main() {
@@ -35,35 +36,6 @@ class HomePage extends StatelessWidget {
     ),
   );
 
-  final button = GestureDetector(
-    onTap: () {
-      // TODO: Implement button action
-    },
-    child: Container(
-      width: 95,
-      height: 60,
-      padding: const EdgeInsets.all(10),
-      decoration: ShapeDecoration(
-        color: mainColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-      child: Center(
-        child: Text(
-          'Start',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: fontColor,
-            fontSize: 24,
-            fontFamily: 'Inter',
-            fontWeight: FontWeight.bold,
-            height: 0,
-          ),
-        )
-      ),
-    ),
-  );
 
   HomePage({super.key});
 
@@ -79,7 +51,38 @@ class HomePage extends StatelessWidget {
             children: <Widget>[
               logo,
               const SizedBox(height: 200),
-              button,
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => GamePage())
+                  );
+                },
+                child: Container(
+                  width: 95,
+                  height: 60,
+                  padding: const EdgeInsets.all(10),
+                  decoration: ShapeDecoration(
+                    color: mainColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Start',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: fontColor,
+                        fontSize: 24,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        height: 0,
+                      ),
+                    )
+                  ),
+                ),
+              ),
             ],
           ),
         ),
