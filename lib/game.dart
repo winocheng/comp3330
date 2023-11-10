@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'constants.dart';
 
 class GamePage extends StatefulWidget {
   @override
@@ -10,6 +11,7 @@ class _GamePageState extends State<GamePage> {
   final question_index = 15;
   var x = -100.0;
   var y = -100.0;
+  var floor = 0;
 
   var pages = [
     QuestionPage(),
@@ -125,34 +127,61 @@ class _AnswerPageState extends State<AnswerPage> {
     var state = context.findAncestorStateOfType<_GamePageState>();
     question_index = state?.question_index;
 
+    const List<String> floor_options = [
+      "G/F",
+      "1/F",
+      "2/F",
+      "3/F",
+      "4/F",
+      "5+/F"
+    ];
+
     var image = Image.asset('assets/images/hku_image.jpg');
     x = state?.x;
     y = state?.y;
-    
 
     print("x: " + x.toString() + " y: " + y.toString());
-    return InteractiveViewer(
-      transformationController: state?.viewTransformationController,
-      constrained: false,
-      minScale: 0.1,
-      maxScale: 3,
-      child: GestureDetector(
-        // store the position of the tap
-        onTapDown: (details) {
-          setState(() {
-            x = details.localPosition.dx;
-            y = details.localPosition.dy;
-            state?.x = x;
-            state?.y = y;
-          });
-          print("x: " + x.toString() + " y: " + y.toString());
-          
-        },
-        child: CustomPaint(
-          child: image,
-          foregroundPainter: CirclePainter(x, y),
+    return Stack(
+      children: <Widget>[
+        InteractiveViewer(
+          transformationController: state?.viewTransformationController,
+          constrained: false,
+          minScale: 0.1,
+          maxScale: 3,
+          child: GestureDetector(
+            // store the position of the tap
+            onTapDown: (details) {
+              setState(() {
+                x = details.localPosition.dx;
+                y = details.localPosition.dy;
+                state?.x = x;
+                state?.y = y;
+              });
+              print("x: " + x.toString() + " y: " + y.toString());
+            },
+            child: CustomPaint(
+              child: image,
+              foregroundPainter: CirclePainter(x, y),
+            ),
+          ),
         ),
-      )
+        Align(
+          alignment: Alignment.bottomRight,
+          child: DropdownButton(
+            value: state?.floor == null
+                ? floor_options[0]
+                : floor_options[state!.floor],
+            items: floor_options.map((String value) {
+              return DropdownMenuItem<String>(value: value, child: Text(value)); //white text with black outline
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                state?.floor = floor_options.indexOf(newValue!);
+              });
+            },
+          ),
+        )
+      ],
     );
   }
 }
@@ -168,7 +197,7 @@ class CirclePainter extends CustomPainter {
     final paint = Paint()
       ..color = Colors.red
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawCircle(Offset(x, y), 10, paint);
   }
 
