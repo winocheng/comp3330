@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'constants.dart';
 
 class GamePage extends StatefulWidget {
   @override
@@ -10,6 +11,7 @@ class _GamePageState extends State<GamePage> {
   final question_index = 15;
   var x = -100.0;
   var y = -100.0;
+  var floor = 0;
 
   var pages = [
     QuestionPage(),
@@ -28,9 +30,9 @@ class _GamePageState extends State<GamePage> {
 
   @override
   void initState() {
-    final zoomFactor = 0.2;
-    final xTranslate = 0.0;
-    final yTranslate = 0.0;
+    const zoomFactor = 0.2;
+    const xTranslate = 0.0;
+    const yTranslate = 0.0;
     viewTransformationController.value.setEntry(0, 0, zoomFactor);
     viewTransformationController.value.setEntry(1, 1, zoomFactor);
     viewTransformationController.value.setEntry(2, 2, zoomFactor);
@@ -43,8 +45,8 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Game'),
-        backgroundColor: Colors.blue,
+        title: const Text('Game'),
+        backgroundColor: mainColor,
       ),
 
       // main game page and a bottom navigation bar
@@ -66,7 +68,7 @@ class _GamePageState extends State<GamePage> {
                 //two buttons (question, answer) in the bottom navigation bar
                 IconButton(
                   color: Colors.white,
-                  icon: Icon(Icons.question_mark_rounded),
+                  icon: const Icon(Icons.question_mark_rounded),
                   onPressed: () {
                     setState(() {
                       page_index = 0;
@@ -75,7 +77,7 @@ class _GamePageState extends State<GamePage> {
                 ),
                 IconButton(
                   color: Colors.white,
-                  icon: Icon(Icons.check_circle_rounded),
+                  icon: const Icon(Icons.check_circle_rounded),
                   onPressed: () {
                     setState(() {
                       page_index = 1;
@@ -102,8 +104,8 @@ class QuestionPage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: InteractiveViewer(
-          child: image,
           constrained: false,
+          child: image,
         ),
       ),
     );
@@ -125,34 +127,123 @@ class _AnswerPageState extends State<AnswerPage> {
     var state = context.findAncestorStateOfType<_GamePageState>();
     question_index = state?.question_index;
 
+    const List<(String, int)> floor_options = [
+      ("G/F", 0),
+      ("1/F", 1),
+      ("2/F", 2),
+      ("3/F", 3),
+      ("4/F", 4),
+      ("5/F+", 5),
+    ];
+
     var image = Image.asset('assets/images/hku_image.jpg');
     x = state?.x;
     y = state?.y;
-    
 
     print("x: " + x.toString() + " y: " + y.toString());
-    return InteractiveViewer(
-      transformationController: state?.viewTransformationController,
-      constrained: false,
-      minScale: 0.1,
-      maxScale: 3,
-      child: GestureDetector(
-        // store the position of the tap
-        onTapDown: (details) {
-          setState(() {
-            x = details.localPosition.dx;
-            y = details.localPosition.dy;
-            state?.x = x;
-            state?.y = y;
-          });
-          print("x: " + x.toString() + " y: " + y.toString());
-          
-        },
-        child: CustomPaint(
-          child: image,
-          foregroundPainter: CirclePainter(x, y),
+    return Stack(
+      children: <Widget>[
+        InteractiveViewer(
+          transformationController: state?.viewTransformationController,
+          constrained: false,
+          minScale: 0.1,
+          maxScale: 3,
+          child: GestureDetector(
+            // store the position of the tap
+            onTapDown: (details) {
+              setState(() {
+                x = details.localPosition.dx;
+                y = details.localPosition.dy;
+                state?.x = x;
+                state?.y = y;
+              });
+              print("x: " + x.toString() + " y: " + y.toString());
+            },
+            child: CustomPaint(
+              foregroundPainter: CirclePainter(x, y),
+              child: image,
+            ),
+          ),
         ),
-      )
+        if (state!.x >= 0)
+          Align(
+              alignment: Alignment.bottomRight,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                      margin: const EdgeInsets.only(bottom: 5),
+                      width: 80,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(5),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.grey,
+                            spreadRadius: 3,
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: DropdownButton(
+                          isDense: true,
+                          borderRadius: BorderRadius.circular(5),
+                          value: floor_options[state.floor].$2,
+                          items: floor_options
+                              .map((value) {
+                                return DropdownMenuItem<int>(
+                                  value: value.$2,
+                                  alignment: Alignment.centerRight,
+                                  child: Text(value.$1),
+                                );
+                              })
+                              .toList()
+                              .reversed
+                              .toList(),
+                          onChanged: (int? newValue) {
+                            setState(() {
+                              state.floor = newValue!;
+                            });
+                          },
+                        ),
+                      )),
+                  Container(
+                    //submit button
+                    margin: const EdgeInsets.only(bottom: 5),
+                    width: 80,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(5),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.grey,
+                          spreadRadius: 3,
+                          blurRadius: 5,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        // TODO: submit the answer
+                        print("submit");
+                      },
+                      child: const Center(
+                        child: Text(
+                          'Submit',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ))
+      ],
     );
   }
 }
@@ -168,7 +259,7 @@ class CirclePainter extends CustomPainter {
     final paint = Paint()
       ..color = Colors.red
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawCircle(Offset(x, y), 10, paint);
   }
 
