@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hku_guesser/game.dart';
 import 'constants.dart';
+import 'camera.dart';
 
 void main() {
-  runApp(HKUGuesserApp());
+  runApp(const HKUGuesserApp());
 }
 
 class HKUGuesserApp extends StatelessWidget {
+  const HKUGuesserApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -36,6 +39,36 @@ class HomePage extends StatelessWidget {
     ),
   );
 
+  GestureDetector buildButton(VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 95,
+        height: 60,
+        padding: const EdgeInsets.all(10),
+        decoration: ShapeDecoration(
+          color: mainColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: Center(
+          child: Text(
+            'Start',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: fontColor,
+              fontSize: 24,
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.bold,
+              height: 0,
+            ),
+          )
+        ),
+      ),
+    );
+  }
+
 
   HomePage({super.key});
 
@@ -50,43 +83,24 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.only(left: 24.0, right:24.0),
             children: <Widget>[
               logo,
-              const SizedBox(height: 200),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => GamePage())
-                  );
-                },
-                child: Container(
-                  width: 95,
-                  height: 60,
-                  padding: const EdgeInsets.all(10),
-                  decoration: ShapeDecoration(
-                    color: mainColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Start',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: fontColor,
-                        fontSize: 24,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.bold,
-                        height: 0,
-                      ),
-                    )
-                  ),
-                ),
-              ),
+              const SizedBox(height: 100),
+              buildButton(() {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => GamePage())
+                );
+              }),
             ],
           ),
         ),
-      )
+      ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        color: mainColor,
+        child: Container(height: 80.0),
+      ),
+      floatingActionButton: const CameraButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
