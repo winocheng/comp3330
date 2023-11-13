@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:hku_guesser/image.dart';
+import 'package:hku_guesser/question_database.dart';
 import 'constants.dart';
 
 class GamePage extends StatefulWidget {
@@ -93,20 +98,66 @@ class _GamePageState extends State<GamePage> {
   }
 }
 
-class QuestionPage extends StatelessWidget {
+class QuestionPage extends StatefulWidget {
+  @override
+  State<QuestionPage> createState() => _QuestionPageState();
+}
+
+class _QuestionPageState extends State<QuestionPage> {
   var question_index;
+  List<Question> questions = [];
+  var n = 1;
+  Future<void> _asyncWork = Future<void>.value(null);
+
 
   @override
-  Widget build(BuildContext context) {
-    var state = context.findAncestorStateOfType<_GamePageState>();
-    var image = Image.asset('assets/images/circle.png');
-    question_index = state?.question_index;
+  void initState() {
+    super.initState();
+    _asyncWork = _performAsyncWork();
+  }
+
+   Future<void> _performAsyncWork() async {
+    final check = await QuestionDatabase.instance.getQuestions();
+    if(check.isEmpty){
+      await QuestionDatabase.instance.insertQuestion(jsonEncode({"x-coordinate": "1250.6396965865638","y-coordinate": "2192.9494311002054","floor": "G"}) , await saveImageToStorageFromAssets('assets/images/image1.jpg', n));
+    }
+    someAsyncOperation();
+    setState(() {});
+  }
+  Future<void> someAsyncOperation() async {
+    final loadedQuestions = await QuestionDatabase.instance.getQuestions();
+      setState(() {
+        questions = loadedQuestions;
+      }
+      );
+  }
+
+  
+
+
+   @override
+    Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: InteractiveViewer(
-          constrained: false,
-          child: image,
-        ),
+      body: FutureBuilder(
+        future: _asyncWork,
+        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Show a loading indicator while the work is in progress
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            var state = context.findAncestorStateOfType<_GamePageState>();
+            var image = Image.file(File(questions[0].imagePath));
+            question_index = state?.question_index;
+            return Scaffold(
+              body: Center(
+                child: InteractiveViewer(
+                  constrained: false,
+                  child: image,
+                ),
+              ),
+            );
+          }
+        },
       ),
     );
   }
@@ -268,3 +319,4 @@ class CirclePainter extends CustomPainter {
     return true;
   }
 }
+
