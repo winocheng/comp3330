@@ -314,9 +314,7 @@ class _TimerWidgetState extends State<TimerWidget> {
       oneSec,
       (Timer timer) {
         if (_start == 0) {
-          setState(() {
-            timer.cancel();
-          });
+          dispose();
         } else {
           setState(() {
             _start--;
