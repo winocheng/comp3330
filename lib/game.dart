@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hku_guesser/transition.dart';
 import 'constants.dart';
 
 class GamePage extends StatefulWidget {
@@ -231,6 +232,10 @@ class _AnswerPageState extends State<AnswerPage> {
                       onTap: () {
                         // TODO: submit the answer
                         print("submit");
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const TransitionPage()));
                       },
                       child: const Center(
                         child: Text(
