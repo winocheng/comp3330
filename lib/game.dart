@@ -6,8 +6,16 @@ import 'package:hku_guesser/transition.dart';
 import 'package:hku_guesser/image.dart';
 import 'package:hku_guesser/question_database.dart';
 import 'constants.dart';
+import 'dart:async';
 
 class GamePage extends StatefulWidget {
+  int remainingTime = 0;
+
+  void handleDisposeTimer(int remainingTime) {
+    // Do something with the remaining time value
+    print('Remaining time: $remainingTime');
+  }
+
   @override
   State<StatefulWidget> createState() => _GamePageState();
 }
@@ -62,7 +70,18 @@ class _GamePageState extends State<GamePage> {
             child: Container(
               color: Colors.white,
               child: Center(
-                child: page(),
+                child: Stack(
+                  children: <Widget>[
+                    page(),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: TimerWidget(
+                        onDispose: widget.handleDisposeTimer,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -335,5 +354,86 @@ class CirclePainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
+  }
+}
+
+class TimerWidget extends StatefulWidget {
+  final void Function(int remainingTime)? onDispose;
+
+  const TimerWidget({Key? key, this.onDispose}) : super(key: key);
+
+  @override
+  State<TimerWidget> createState() => _TimerWidgetState();
+}
+
+class _TimerWidgetState extends State<TimerWidget> {
+  late Timer _timer;
+  int _start = questionTime;
+  int remainingTime = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    startTimer();
+  }
+
+  void startTimer() {
+    const oneSec = Duration(seconds: 1);
+    _timer = Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (_start == 0) {
+          dispose();
+        } else {
+          setState(() {
+            _start--;
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    widget.onDispose?.call(_start);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+        alignment: Alignment.topRight,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Container(
+              margin: const EdgeInsets.only(bottom: 5),
+              width: 80,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(5),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.grey,
+                    spreadRadius: 3,
+                    blurRadius: 5,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                "$_start",
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.black),
+              ),
+            ),
+          ],
+        ));
   }
 }
