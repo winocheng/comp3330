@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:hku_guesser/transition.dart';
 import 'package:hku_guesser/image.dart';
 import 'package:hku_guesser/question_database.dart';
+import 'package:hku_guesser/game_state.dart';
 import 'constants.dart';
 import 'dart:async';
 
 class GamePage extends StatefulWidget {
-  int remainingTime = 0;
+  final GameState? gameState;
+  const GamePage({Key? key, this.gameState}) : super(key: key);
 
   void handleDisposeTimer(int remainingTime) {
     // Do something with the remaining time value
@@ -21,6 +23,7 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
+  late GameState? gameState;
   var page_index = 0;
   final question_index = 15;
   var x = -100.0;
@@ -44,6 +47,7 @@ class _GamePageState extends State<GamePage> {
 
   @override
   void initState() {
+    super.initState();
     const zoomFactor = 0.2;
     const xTranslate = 0.0;
     const yTranslate = 0.0;
@@ -52,7 +56,7 @@ class _GamePageState extends State<GamePage> {
     viewTransformationController.value.setEntry(2, 2, zoomFactor);
     viewTransformationController.value.setEntry(0, 3, -xTranslate);
     viewTransformationController.value.setEntry(1, 3, -yTranslate);
-    super.initState();
+    gameState = widget.gameState;
   }
 
   @override
@@ -78,6 +82,7 @@ class _GamePageState extends State<GamePage> {
                       right: 0,
                       child: TimerWidget(
                         onDispose: widget.handleDisposeTimer,
+                        duration: widget.gameState?.roundTime ?? 10,
                       ),
                     ),
                   ],
@@ -313,12 +318,14 @@ class _AnswerPageState extends State<AnswerPage> {
                     ),
                     child: GestureDetector(
                       onTap: () {
-                        // TODO: submit the answer
                         print("submit");
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const TransitionPage()));
+                                builder: (context) => TransitionPage(
+                                      gameState: state.gameState ??
+                                          GameState(questions: []),
+                                    )));
                       },
                       child: const Center(
                         child: Text(
@@ -359,8 +366,10 @@ class CirclePainter extends CustomPainter {
 
 class TimerWidget extends StatefulWidget {
   final void Function(int remainingTime)? onDispose;
+  final int duration;
 
-  const TimerWidget({Key? key, this.onDispose}) : super(key: key);
+  const TimerWidget({Key? key, this.onDispose, required this.duration})
+      : super(key: key);
 
   @override
   State<TimerWidget> createState() => _TimerWidgetState();
@@ -368,12 +377,13 @@ class TimerWidget extends StatefulWidget {
 
 class _TimerWidgetState extends State<TimerWidget> {
   late Timer _timer;
-  int _start = questionTime;
+  late int _start;
   int remainingTime = 0;
 
   @override
   void initState() {
     super.initState();
+    _start = widget.duration;
     startTimer();
   }
 

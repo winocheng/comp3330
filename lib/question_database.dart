@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:hku_guesser/game_state.dart';
 
 class QuestionDatabase {
   static final QuestionDatabase instance = QuestionDatabase._init();
@@ -50,33 +51,5 @@ class QuestionDatabase {
     return List<Question>.from(
       maps.map((map) => Question.fromMap(map)),
     );
-  }
-}
-
-class Question {
-  final int id;
-  final String jsonText;
-  final String imagePath;
-
-  Question({
-    required this.id,
-    required this.jsonText,
-    required this.imagePath,
-  });
-
-  factory Question.fromMap(Map<String, dynamic> map) {
-    return Question(
-      id: map['id'],
-      jsonText: map['jsonText'],
-      imagePath: map['imagePath'],
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'jsonText': jsonText,
-      'imagePath': imagePath,
-    };
   }
 }

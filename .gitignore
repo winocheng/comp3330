@@ -43,3 +43,12 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /android/local.properties
+
+# GeneratedPluginRegistrant
+/android/**/GeneratedPluginRegistrant.java
+/ios/Runner/GeneratedPluginRegistrant.*
+/linux/flutter/generated_plugin_registrant.*
+/linux/flutter/generated_plugins.cmake
+/macos/Flutter/GeneratedPluginRegistrant.swift
+/windows/flutter/generated_plugin_registrant.*
+/windows/flutter/generated_plugins.cmake

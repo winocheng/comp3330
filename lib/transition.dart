@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hku_guesser/constants.dart';
 import 'package:hku_guesser/game.dart';
-import 'constants.dart';
+import 'package:hku_guesser/game_state.dart';
+
 
 class TransitionPage extends StatefulWidget {
-  final int score;
-  final int maxT = 5;
-  const TransitionPage({Key? key, this.score = 0}) : super(key: key);
+  final GameState gameState;
+  const TransitionPage({Key? key, required this.gameState}) : super(key: key);
 
   @override
   State<TransitionPage> createState() => _TransitionPageState();
@@ -43,7 +44,11 @@ class _TransitionPageState extends State<TransitionPage> {
   void nextRound() {
     setState(() => countdownTimer!.cancel());
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => GamePage()));
+        context,
+        MaterialPageRoute(
+            builder: (context) => GamePage(
+                  gameState: widget.gameState,
+                )));
   }
 
   @override
@@ -65,7 +70,7 @@ class _TransitionPageState extends State<TransitionPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'You score ${widget.score} this round!',
+                    'You score ${widget.gameState.roundScore} this round!',
                     style: TextStyle(fontSize: 25),
                   ),
                   Container(
