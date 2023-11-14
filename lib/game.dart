@@ -1,7 +1,21 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:hku_guesser/transition.dart';
+import 'package:hku_guesser/image.dart';
+import 'package:hku_guesser/question_database.dart';
 import 'constants.dart';
+import 'dart:async';
 
 class GamePage extends StatefulWidget {
+  int remainingTime = 0;
+
+  void handleDisposeTimer(int remainingTime) {
+    // Do something with the remaining time value
+    print('Remaining time: $remainingTime');
+  }
+
   @override
   State<StatefulWidget> createState() => _GamePageState();
 }
@@ -56,7 +70,18 @@ class _GamePageState extends State<GamePage> {
             child: Container(
               color: Colors.white,
               child: Center(
-                child: page(),
+                child: Stack(
+                  children: <Widget>[
+                    page(),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: TimerWidget(
+                        onDispose: widget.handleDisposeTimer,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -93,20 +118,79 @@ class _GamePageState extends State<GamePage> {
   }
 }
 
-class QuestionPage extends StatelessWidget {
+class QuestionPage extends StatefulWidget {
+  @override
+  State<QuestionPage> createState() => _QuestionPageState();
+}
+
+class _QuestionPageState extends State<QuestionPage> {
   var question_index;
+  List<Question> questions = [];
+  var n = 1;
+  Future<void> _asyncWork = Future<void>.value(null);
+
+  final viewTransformationController = TransformationController();
+
+  @override
+  void initState() {
+    super.initState();
+    _asyncWork = _performAsyncWork();
+    const zoomFactor = 0.8;
+    const xTranslate = 250.0;
+    const yTranslate = 200.0;
+    viewTransformationController.value.setEntry(0, 0, zoomFactor);
+    viewTransformationController.value.setEntry(1, 1, zoomFactor);
+    viewTransformationController.value.setEntry(2, 2, zoomFactor);
+    viewTransformationController.value.setEntry(0, 3, -xTranslate);
+    viewTransformationController.value.setEntry(1, 3, -yTranslate);
+  }
+
+  Future<void> _performAsyncWork() async {
+    final check = await QuestionDatabase.instance.getQuestions();
+    if (check.isEmpty) {
+      await QuestionDatabase.instance.insertQuestion(
+          jsonEncode({
+            "x-coordinate": "1250.6396965865638",
+            "y-coordinate": "2192.9494311002054",
+            "floor": "G"
+          }),
+          await saveImageToStorageFromAssets('assets/images/image1.jpg', n));
+    }
+    await someAsyncOperation();
+    setState(() {});
+  }
+
+  Future<void> someAsyncOperation() async {
+    final loadedQuestions = await QuestionDatabase.instance.getQuestions();
+    setState(() {
+      questions = loadedQuestions;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    var state = context.findAncestorStateOfType<_GamePageState>();
-    var image = Image.asset('assets/images/circle.png');
-    question_index = state?.question_index;
     return Scaffold(
-      body: Center(
-        child: InteractiveViewer(
-          constrained: false,
-          child: image,
-        ),
+      body: FutureBuilder(
+        future: _asyncWork,
+        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Show a loading indicator while the work is in progress
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            var state = context.findAncestorStateOfType<_GamePageState>();
+            var image = Image.file(File(questions[0].imagePath));
+            question_index = state?.question_index;
+            return Scaffold(
+              body: Center(
+                child: InteractiveViewer(
+                  transformationController: viewTransformationController,
+                  constrained: false,
+                  child: image,
+                ),
+              ),
+            );
+          }
+        },
       ),
     );
   }
@@ -231,6 +315,10 @@ class _AnswerPageState extends State<AnswerPage> {
                       onTap: () {
                         // TODO: submit the answer
                         print("submit");
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const TransitionPage()));
                       },
                       child: const Center(
                         child: Text(
@@ -266,5 +354,86 @@ class CirclePainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
+  }
+}
+
+class TimerWidget extends StatefulWidget {
+  final void Function(int remainingTime)? onDispose;
+
+  const TimerWidget({Key? key, this.onDispose}) : super(key: key);
+
+  @override
+  State<TimerWidget> createState() => _TimerWidgetState();
+}
+
+class _TimerWidgetState extends State<TimerWidget> {
+  late Timer _timer;
+  int _start = questionTime;
+  int remainingTime = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    startTimer();
+  }
+
+  void startTimer() {
+    const oneSec = Duration(seconds: 1);
+    _timer = Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (_start == 0) {
+          dispose();
+        } else {
+          setState(() {
+            _start--;
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    widget.onDispose?.call(_start);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+        alignment: Alignment.topRight,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Container(
+              margin: const EdgeInsets.only(bottom: 5),
+              width: 80,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(5),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.grey,
+                    spreadRadius: 3,
+                    blurRadius: 5,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                "$_start",
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.black),
+              ),
+            ),
+          ],
+        ));
   }
 }

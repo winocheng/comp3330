@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 // Colors
-Color backgroundColor = Colors.white;
-Color highlightColor1 = const Color(0xFFFE5726);
-Color highlightColor2 = const Color(0xFF3493D0);
-Color mainColor = const Color(0xFF00B8CD);
-Color fontColor = Colors.white;
+const Color backgroundColor = Colors.white;
+const Color highlightColor1 = Color(0xFFFE5726);
+const Color highlightColor2 = Color(0xFF3493D0);
+const Color mainColor = Color(0xFF00B8CD);
+const Color fontColor = Colors.white;
+
+int questionTime = 10;
 
 // Custom Components
 class NoOverscroll extends ScrollBehavior {
