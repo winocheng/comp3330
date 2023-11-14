@@ -7,7 +7,7 @@ const Color highlightColor2 = Color(0xFF3493D0);
 const Color mainColor = Color(0xFF00B8CD);
 const Color fontColor = Colors.white;
 
-int questionTime = 10;
+int questionTime = 1000;
 
 // Custom Components
 class NoOverscroll extends ScrollBehavior {
