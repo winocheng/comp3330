@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hku_guesser/transition.dart';
 import 'package:hku_guesser/image.dart';
 import 'package:hku_guesser/question_database.dart';
 import 'constants.dart';
@@ -144,27 +145,30 @@ class _QuestionPageState extends State<QuestionPage> {
     viewTransformationController.value.setEntry(1, 3, -yTranslate);
   }
 
-   Future<void> _performAsyncWork() async {
+  Future<void> _performAsyncWork() async {
     final check = await QuestionDatabase.instance.getQuestions();
-    if(check.isEmpty){
-      await QuestionDatabase.instance.insertQuestion(jsonEncode({"x-coordinate": "1250.6396965865638","y-coordinate": "2192.9494311002054","floor": "G"}) , await saveImageToStorageFromAssets('assets/images/image1.jpg', n));
+    if (check.isEmpty) {
+      await QuestionDatabase.instance.insertQuestion(
+          jsonEncode({
+            "x-coordinate": "1250.6396965865638",
+            "y-coordinate": "2192.9494311002054",
+            "floor": "G"
+          }),
+          await saveImageToStorageFromAssets('assets/images/image1.jpg', n));
     }
     await someAsyncOperation();
     setState(() {});
   }
+
   Future<void> someAsyncOperation() async {
     final loadedQuestions = await QuestionDatabase.instance.getQuestions();
-      setState(() {
-        questions = loadedQuestions;
-      }
-      );
+    setState(() {
+      questions = loadedQuestions;
+    });
   }
 
-  
-
-
-   @override
-    Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
         future: _asyncWork,
@@ -311,6 +315,10 @@ class _AnswerPageState extends State<AnswerPage> {
                       onTap: () {
                         // TODO: submit the answer
                         print("submit");
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const TransitionPage()));
                       },
                       child: const Center(
                         child: Text(
