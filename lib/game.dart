@@ -109,11 +109,20 @@ class _QuestionPageState extends State<QuestionPage> {
   var n = 1;
   Future<void> _asyncWork = Future<void>.value(null);
 
+  final viewTransformationController = TransformationController();
 
   @override
   void initState() {
     super.initState();
     _asyncWork = _performAsyncWork();
+    const zoomFactor = 0.8;
+    const xTranslate = 250.0;
+    const yTranslate = 200.0;
+    viewTransformationController.value.setEntry(0, 0, zoomFactor);
+    viewTransformationController.value.setEntry(1, 1, zoomFactor);
+    viewTransformationController.value.setEntry(2, 2, zoomFactor);
+    viewTransformationController.value.setEntry(0, 3, -xTranslate);
+    viewTransformationController.value.setEntry(1, 3, -yTranslate);
   }
 
    Future<void> _performAsyncWork() async {
@@ -121,7 +130,7 @@ class _QuestionPageState extends State<QuestionPage> {
     if(check.isEmpty){
       await QuestionDatabase.instance.insertQuestion(jsonEncode({"x-coordinate": "1250.6396965865638","y-coordinate": "2192.9494311002054","floor": "G"}) , await saveImageToStorageFromAssets('assets/images/image1.jpg', n));
     }
-    someAsyncOperation();
+    await someAsyncOperation();
     setState(() {});
   }
   Future<void> someAsyncOperation() async {
@@ -151,6 +160,7 @@ class _QuestionPageState extends State<QuestionPage> {
             return Scaffold(
               body: Center(
                 child: InteractiveViewer(
+                  transformationController: viewTransformationController,
                   constrained: false,
                   child: image,
                 ),
