@@ -48,9 +48,9 @@ class _GamePageState extends State<GamePage> {
   @override
   void initState() {
     super.initState();
-    const zoomFactor = 0.2;
-    const xTranslate = 0.0;
-    const yTranslate = 0.0;
+    const zoomFactor = 0.31;
+    const xTranslate = 32.0;
+    const yTranslate = 50.0;
     viewTransformationController.value.setEntry(0, 0, zoomFactor);
     viewTransformationController.value.setEntry(1, 1, zoomFactor);
     viewTransformationController.value.setEntry(2, 2, zoomFactor);
@@ -140,8 +140,8 @@ class _QuestionPageState extends State<QuestionPage> {
   void initState() {
     super.initState();
     _asyncWork = _performAsyncWork();
-    const zoomFactor = 0.8;
-    const xTranslate = 250.0;
+    const zoomFactor = 1.0;
+    const xTranslate = 500.0;
     const yTranslate = 200.0;
     viewTransformationController.value.setEntry(0, 0, zoomFactor);
     viewTransformationController.value.setEntry(1, 1, zoomFactor);
@@ -239,7 +239,7 @@ class _AnswerPageState extends State<AnswerPage> {
           maxScale: 3,
           child: GestureDetector(
             // store the position of the tap
-            onTapDown: (details) {
+            onTapUp: (details) {
               setState(() {
                 x = details.localPosition.dx;
                 y = details.localPosition.dy;
@@ -247,6 +247,7 @@ class _AnswerPageState extends State<AnswerPage> {
                 state?.y = y;
               });
               print("x: " + x.toString() + " y: " + y.toString());
+              // print(state?.viewTransformationController.value);
             },
             child: CustomPaint(
               foregroundPainter: CirclePainter(x, y),
