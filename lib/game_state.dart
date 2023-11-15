@@ -28,16 +28,16 @@ class Question {
 
 class GameState {
   List<Question> questions;
-  int round;
-  int totalScore;
-  int roundScore;
-  final roundTime = 60; // in seconds
+  final int totalRound;
+  int totalScore = 0;
+  int roundNum = 1;
+  int roundScore = 0;
+  final int roundTime; // in seconds
   final transitionTime = 5; // in seconds
 
   GameState({
-    required this.questions,
-    this.round = 1,
-    this.totalScore = 0,
-    this.roundScore = 0,
+    this.questions = const [],
+    required this.totalRound,
+    this.roundTime = 60,
   });
 }

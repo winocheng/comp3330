@@ -14,6 +14,32 @@ class TransitionPage extends StatefulWidget {
 }
 
 class _TransitionPageState extends State<TransitionPage> {
+  @override
+  void initState() {
+    super.initState();
+    widget.gameState.roundNum++;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final gameState = widget.gameState;
+    if (gameState.roundNum > gameState.totalRound) {
+      return Result(gameState: gameState);
+    } else {
+      return Countdown(gameState: gameState);
+    }
+  }
+}
+
+class Countdown extends StatefulWidget {
+  final GameState gameState;
+  const Countdown({Key? key, required this.gameState}) : super(key: key);
+
+  @override
+  State<Countdown> createState() => _CountdownState();
+}
+
+class _CountdownState extends State<Countdown> {
   Timer? countdownTimer;
   Duration _myDuration = Duration(seconds: 5);
   @override
@@ -61,57 +87,102 @@ class _TransitionPageState extends State<TransitionPage> {
           height: 0,
         ),
         child: Container(
+          color: mainColor,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'You score ${widget.gameState.roundScore} this round!\n'
+                'Total score: ${widget.gameState.totalScore}\n'
+                'Round ${widget.gameState.roundNum} starts in:',
+                style: TextStyle(fontSize: 25),
+                textAlign: TextAlign.center,
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 15),
+                child: SizedBox(
+                  width: 177,
+                  height: 177,
+                  child: Stack(
+                    children: [
+                      Image.asset('assets/images/location.png'),
+                      Positioned(
+                        left: 69,
+                        top: 34,
+                        child: Text(
+                          seconds,
+                          style: TextStyle(
+                            fontSize: 60,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              TextButton(
+                child: Text(
+                  "Next Question",
+                  style: TextStyle(color: fontColor, fontSize: 20),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.green,
+                ),
+                onPressed: () {
+                  print("Next round");
+                  nextRound();
+                },
+              ),
+            ],
+          ),
+        ));
+  }
+}
+
+class Result extends StatelessWidget {
+  final GameState gameState;
+  const Result({Key? key, required this.gameState}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTextStyle(
+        style: const TextStyle(
+          color: fontColor,
+          fontFamily: 'Inter',
+          height: 2,
+        ),
+        child: Container(
             color: mainColor,
-            child: Align(
-              alignment: Alignment(0, -0.25),
-              child: Column(
+            child: Column(
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  Text('Game Finished!',
+                      style: TextStyle(
+                          fontFamily: 'LuckiestGuy',
+                          color: highlightColor1,
+                          fontSize: 40)),
                   Text(
-                    'You score ${widget.gameState.roundScore} this round!',
-                    style: TextStyle(fontSize: 25),
-                  ),
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 15),
-                    child: SizedBox(
-                      width: 177,
-                      height: 177,
-                      child: Stack(
-                        children: [
-                          Image.asset('assets/images/location.png'),
-                          Positioned(
-                            left: 69,
-                            top: 34,
-                            child: Text(
-                              seconds,
-                              style: TextStyle(
-                                fontSize: 60,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                      'You score ${gameState.totalScore} in ${gameState.totalRound} rounds!',
+                      style: TextStyle(fontSize: 25, height: 3)),
                   TextButton(
                     child: Text(
-                      "Next Question",
+                      "Return",
                       style: TextStyle(color: fontColor, fontSize: 20),
                     ),
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
                     onPressed: () {
-                      print("Next round");
-                      nextRound();
+                      print("Quit");
+                      Navigator.pop(context);
                     },
-                  ),
-                ],
-              ),
-            )));
+                  )
+                ])));
   }
 }

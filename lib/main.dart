@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hku_guesser/game.dart';
+import 'package:hku_guesser/game_state.dart';
 import 'constants.dart';
 import 'camera.dart';
 
@@ -27,7 +28,7 @@ class HomePage extends StatelessWidget {
     width: 274,
     height: 186,
     child: Text(
-      'HKU          Guesser',
+      'HKU\nGuesser',
       textAlign: TextAlign.center,
       style: TextStyle(
         color: highlightColor1,
@@ -87,7 +88,10 @@ class HomePage extends StatelessWidget {
               buildButton(() {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => GamePage())
+                    MaterialPageRoute(
+                        builder: (context) => GamePage(
+                              gameState: GameState(totalRound: 5),
+                            ))
                 );
               }),
             ],

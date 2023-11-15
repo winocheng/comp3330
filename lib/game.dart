@@ -10,8 +10,8 @@ import 'constants.dart';
 import 'dart:async';
 
 class GamePage extends StatefulWidget {
-  final GameState? gameState;
-  const GamePage({Key? key, this.gameState}) : super(key: key);
+  final GameState gameState;
+  const GamePage({Key? key, required this.gameState}) : super(key: key);
 
   void handleDisposeTimer(int remainingTime) {
     // Do something with the remaining time value
@@ -23,7 +23,7 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-  late GameState? gameState;
+  late GameState gameState;
   var page_index = 0;
   final question_index = 15;
   var x = -100.0;
@@ -82,7 +82,7 @@ class _GamePageState extends State<GamePage> {
                       right: 0,
                       child: TimerWidget(
                         onDispose: widget.handleDisposeTimer,
-                        duration: widget.gameState?.roundTime ?? 10,
+                        duration: widget.gameState.roundTime,
                       ),
                     ),
                   ],
@@ -323,8 +323,7 @@ class _AnswerPageState extends State<AnswerPage> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => TransitionPage(
-                                      gameState: state.gameState ??
-                                          GameState(questions: []),
+                                      gameState: state.gameState,
                                     )));
                       },
                       child: const Center(
@@ -393,7 +392,9 @@ class _TimerWidgetState extends State<TimerWidget> {
       oneSec,
       (Timer timer) {
         if (_start == 0) {
-          dispose();
+          // TODO: implement timer dispose action
+          _timer.cancel();
+          //dispose();
         } else {
           setState(() {
             _start--;
