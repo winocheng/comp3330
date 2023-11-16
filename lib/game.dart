@@ -13,11 +13,6 @@ class GamePage extends StatefulWidget {
   final GameState gameState;
   const GamePage({Key? key, required this.gameState}) : super(key: key);
 
-  void handleDisposeTimer(int remainingTime) {
-    // Do something with the remaining time value
-    print('Remaining time: $remainingTime');
-  }
-
   @override
   State<StatefulWidget> createState() => _GamePageState();
 }
@@ -81,8 +76,7 @@ class _GamePageState extends State<GamePage> {
                       top: 0,
                       right: 0,
                       child: TimerWidget(
-                        onDispose: widget.handleDisposeTimer,
-                        duration: widget.gameState.roundTime,
+                        gameState: widget.gameState,
                       ),
                     ),
                   ],
@@ -344,11 +338,9 @@ class _AnswerPageState extends State<AnswerPage> {
 }
 
 class TimerWidget extends StatefulWidget {
-  final void Function(int remainingTime)? onDispose;
-  final int duration;
+  final GameState gameState;
 
-  const TimerWidget({Key? key, this.onDispose, required this.duration})
-      : super(key: key);
+  const TimerWidget({Key? key, required this.gameState}) : super(key: key);
 
   @override
   State<TimerWidget> createState() => _TimerWidgetState();
@@ -357,12 +349,11 @@ class TimerWidget extends StatefulWidget {
 class _TimerWidgetState extends State<TimerWidget> {
   late Timer _timer;
   late int _start;
-  int remainingTime = 0;
 
   @override
   void initState() {
     super.initState();
-    _start = widget.duration;
+    _start = widget.gameState.roundTime;
     startTimer();
   }
 
@@ -372,9 +363,14 @@ class _TimerWidgetState extends State<TimerWidget> {
       oneSec,
       (Timer timer) {
         if (_start == 0) {
-          // TODO: implement timer dispose action
           _timer.cancel();
-          //dispose();
+          widget.gameState.roundScore = 0;
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TransitionPage(
+                        gameState: widget.gameState,
+                      )));
         } else {
           setState(() {
             _start--;
@@ -386,9 +382,8 @@ class _TimerWidgetState extends State<TimerWidget> {
 
   @override
   void dispose() {
-    _timer.cancel();
-    widget.onDispose?.call(_start);
     super.dispose();
+    _timer.cancel();
   }
 
   @override
