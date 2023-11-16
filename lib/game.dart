@@ -343,27 +343,6 @@ class _AnswerPageState extends State<AnswerPage> {
   }
 }
 
-class CirclePainter extends CustomPainter {
-  var x;
-  var y;
-
-  CirclePainter(this.x, this.y);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.red
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(Offset(x, y), 10, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
-  }
-}
-
 class TimerWidget extends StatefulWidget {
   final void Function(int remainingTime)? onDispose;
   final int duration;
