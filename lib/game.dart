@@ -8,6 +8,7 @@ import 'package:hku_guesser/question_database.dart';
 import 'package:hku_guesser/game_state.dart';
 import 'constants.dart';
 import 'dart:async';
+import 'dart:math';
 
 class GamePage extends StatefulWidget {
   final GameState gameState;
@@ -163,6 +164,8 @@ class _QuestionPageState extends State<QuestionPage> {
     final loadedQuestions = await QuestionDatabase.instance.getQuestions();
     setState(() {
       questions = loadedQuestions;
+      context.findAncestorStateOfType<_GamePageState>()!.gameState.questions =
+          loadedQuestions;
     });
   }
 
@@ -204,6 +207,31 @@ class _AnswerPageState extends State<AnswerPage> {
   var question_index;
   var x;
   var y;
+
+  void calculateScore(GameState gameState, var gameFloor) {
+    var base = 1000;
+    var jsonData = jsonDecode(gameState.questions[
+      0
+      // gameState.roundNum-1
+      ].jsonText);
+    var xCoordinate = jsonData['x-coordinate'];
+    var yCoordinate = jsonData['y-coordinate'];
+    var floor = jsonData['floor'];
+    var xp = (double.parse(xCoordinate) - x).abs() / 10;
+    var yp = (double.parse(yCoordinate) - y).abs() / 10;
+    var fp;
+    if(floor=="G"){
+      floor="0";
+    }
+    if (gameFloor==int.parse(floor)) {
+      fp = 100;
+    } else {
+      fp = -100;
+    }
+    gameState.roundScore =
+        ((base - xp - yp + fp) * (gameState.remainingTime/100)).toInt();
+    gameState.totalScore += gameState.roundScore;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -314,6 +342,8 @@ class _AnswerPageState extends State<AnswerPage> {
                     child: GestureDetector(
                       onTap: () {
                         print("submit");
+                        calculateScore(state.gameState, state.floor);
+                        print(state.gameState.questions.length);
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -374,6 +404,7 @@ class _TimerWidgetState extends State<TimerWidget> {
         } else {
           setState(() {
             _start--;
+            widget.gameState.remainingTime = _start;
           });
         }
       },

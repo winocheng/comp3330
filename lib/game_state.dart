@@ -32,6 +32,7 @@ class GameState {
   int totalScore = 0;
   int roundNum = 1;
   int roundScore = 0;
+  int remainingTime=0;
   final int roundTime; // in seconds
   final transitionTime = 5; // in seconds
 
