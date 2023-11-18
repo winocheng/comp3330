@@ -153,7 +153,6 @@ class _QuestionPageState extends State<QuestionPage> {
     }
     
     await someAsyncOperation();
-    print("setting state");
     setState(() {});
   }
 
