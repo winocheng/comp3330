@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CreateQuestion extends StatelessWidget {
   final XFile image;
@@ -163,11 +164,21 @@ class _AnswerPageState extends State<NewAnswerPage> {
                             'floor': floor,
                           };
 
-                          final response = await http.post(
-                            Uri.parse("$serverIP/create_question"),
-                            headers: {'Content-Type': 'application/json'},
-                            body: jsonEncode(data)
-                          );
+                          try {
+                            final response = await http.post(
+                              Uri.parse("$serverIP/create_question"),
+                              headers: {'Content-Type': 'application/json'},
+                              body: jsonEncode(data)
+                            );
+
+                            Fluttertoast.showToast(
+                              msg: "Successfully Created New Question"
+                            );
+                          } on SocketException {
+                            Fluttertoast.showToast(
+                              msg: "Error Connecting to Server"
+                            );
+                          }
                         })
                         .then((value) {
                           Navigator.pop(context);
