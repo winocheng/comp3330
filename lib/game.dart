@@ -136,7 +136,7 @@ class _QuestionPageState extends State<QuestionPage> {
     super.initState();
     _asyncWork = _performAsyncWork();
     const zoomFactor = 1.0;
-    const xTranslate = 500.0;
+    const xTranslate = 0.0;
     const yTranslate = 200.0;
     viewTransformationController.value.setEntry(0, 0, zoomFactor);
     viewTransformationController.value.setEntry(1, 1, zoomFactor);
@@ -180,12 +180,14 @@ class _QuestionPageState extends State<QuestionPage> {
             return const Center(child: CircularProgressIndicator());
           } else {
             var state = context.findAncestorStateOfType<_GamePageState>();
-            var image = Image.file(File(state!.gameState.questions[state.gameState.roundNum - 1].imagePath));
+            var imagefile = File(state!.gameState.questions[state.gameState.roundNum - 1].imagePath);
+            var image = Image.file(imagefile,height: 900,);
             question_index = state.question_index;
              return Scaffold(
               body: Center(
                 child: InteractiveViewer(
                   transformationController: viewTransformationController,
+                  minScale: 0.01,
                   constrained: false,
                   child: image,
                 ),
