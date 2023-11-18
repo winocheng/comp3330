@@ -41,10 +41,11 @@ class Countdown extends StatefulWidget {
 
 class _CountdownState extends State<Countdown> {
   Timer? countdownTimer;
-  Duration _myDuration = Duration(seconds: 5);
+  late Duration _myDuration;
   @override
   void initState() {
     super.initState();
+    _myDuration = Duration(seconds: widget.gameState.transitionTime);
     countdownTimer =
         Timer.periodic(Duration(seconds: 1), (_) => setCountDown());
   }
@@ -60,7 +61,7 @@ class _CountdownState extends State<Countdown> {
       final seconds = _myDuration.inSeconds - 1;
       if (seconds < 0) {
         print("Next round");
-        nextRound();
+        //nextRound();
       } else {
         _myDuration = Duration(seconds: seconds);
       }
@@ -72,9 +73,7 @@ class _CountdownState extends State<Countdown> {
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => GamePage(
-                  gameState: widget.gameState,
-                )));
+            builder: (context) => GamePage(gameState: widget.gameState)));
   }
 
   @override
@@ -95,7 +94,11 @@ class _CountdownState extends State<Countdown> {
             children: [
               Text(
                 'You score ${widget.gameState.roundScore} this round!\n'
-                'Total score: ${widget.gameState.totalScore}\n'
+                'Total score: ${widget.gameState.totalScore}',
+                style: TextStyle(fontSize: 25),
+                textAlign: TextAlign.center,
+              ),
+              Text(
                 'Round ${widget.gameState.roundNum} starts in:',
                 style: TextStyle(fontSize: 25),
                 textAlign: TextAlign.center,
@@ -108,9 +111,8 @@ class _CountdownState extends State<Countdown> {
                   child: Stack(
                     children: [
                       Image.asset('assets/images/location.png'),
-                      Positioned(
-                        left: 69,
-                        top: 34,
+                      Align(
+                        alignment: Alignment(0, -0.3),
                         child: Text(
                           seconds,
                           style: TextStyle(
@@ -166,23 +168,27 @@ class Result extends StatelessWidget {
                       style: TextStyle(
                           fontFamily: 'LuckiestGuy',
                           color: highlightColor1,
-                          fontSize: 40)),
+                          fontSize: 45)),
                   Text(
-                      'You score ${gameState.totalScore} in ${gameState.totalRound} rounds!',
-                      style: TextStyle(fontSize: 25, height: 3)),
-                  TextButton(
-                    child: Text(
-                      "Return",
-                      style: TextStyle(color: fontColor, fontSize: 20),
+                      'You score ${gameState.roundScore} this round!\n'
+                      'In ${gameState.totalRound} rounds, you score ${gameState.totalScore}!',
+                      style: TextStyle(fontSize: 22, height: 2)),
+                  Container(
+                    margin: EdgeInsets.only(top: 50),
+                    child: TextButton(
+                      child: Text(
+                        "Return",
+                        style: TextStyle(color: fontColor, fontSize: 20),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
+                      onPressed: () {
+                        print("Quit");
+                        Navigator.pop(context);
+                      },
                     ),
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                    onPressed: () {
-                      print("Quit");
-                      Navigator.pop(context);
-                    },
-                  )
+                  ),
                 ])));
   }
 }

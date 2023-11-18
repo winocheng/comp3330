@@ -166,10 +166,16 @@ class _QuestionPageState extends State<QuestionPage> {
   }
 
   Future<void> someAsyncOperation() async {
-    final loadedQuestions = await QuestionDatabase.instance.getQuestions();
-    setState(() {
-      questions = loadedQuestions;
-    });
+    if (!context.findAncestorStateOfType<_GamePageState>()!.gameState.shuffle) {
+      final loadedQuestions = await QuestionDatabase.instance.getQuestions();
+      loadedQuestions.shuffle();
+      setState(() {
+        context.findAncestorStateOfType<_GamePageState>()!.gameState.questions =
+            loadedQuestions;
+        context.findAncestorStateOfType<_GamePageState>()!.gameState.shuffle =
+            true;
+      });
+    }
   }
 
   @override
@@ -210,6 +216,29 @@ class _AnswerPageState extends State<AnswerPage> {
   var question_index;
   var x;
   var y;
+
+  void calculateScore(GameState gameState, var gameFloor) {
+    var base = 1000;
+    var jsonData =
+        jsonDecode(gameState.questions[gameState.roundNum - 1].jsonText);
+    var xCoordinate = jsonData['x-coordinate'];
+    var yCoordinate = jsonData['y-coordinate'];
+    var floor = jsonData['floor'];
+    var xp = (double.parse(xCoordinate) - x).abs() / 10;
+    var yp = (double.parse(yCoordinate) - y).abs() / 10;
+    var fp;
+    if (floor == "G") {
+      floor = "0";
+    }
+    if (gameFloor == int.parse(floor)) {
+      fp = 100;
+    } else {
+      fp = -100;
+    }
+    gameState.roundScore =
+        ((base - xp - yp + fp) * (gameState.remainingTime / 100)).toInt();
+    gameState.totalScore += gameState.roundScore;
+  }
 
   @override
   Widget build(BuildContext context) {

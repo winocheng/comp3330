@@ -89,9 +89,8 @@ class HomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                     MaterialPageRoute(
-                        builder: (context) => GamePage(
-                              gameState: GameState(totalRound: 5),
-                            ))
+                        builder: (context) =>
+                            GamePage(gameState: GameState(totalRound: 5)))
                 );
               }),
             ],
