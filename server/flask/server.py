@@ -5,6 +5,7 @@ import json
 from flask import Flask, jsonify, request
 from pymongo import MongoClient
 from bson.json_util import dumps, loads
+from bson.objectid import ObjectId
 from base64 import b64encode, b64decode
 
 app = Flask(__name__)
@@ -13,7 +14,12 @@ client = MongoClient("mongo:27017")
 
 @app.route('/sync_question', methods=['GET'])
 def get_question():
-    documents = client.db.questions.find()
+    query = request.args.get('after')
+
+    if query is not None:
+        documents = client.db.questions.find({"_id": {"$gt": ObjectId(query)}})
+    else:
+        documents = client.db.questions.find()
     
     return_data = [{
         "id": str(document["_id"]),
@@ -25,18 +31,7 @@ def get_question():
     
     return jsonify(return_data)
     
-@app.route('/sync_question', methods=['POST'])
-def update_question():
-    documents = client.db.questions.find()
-    
-    ids = [str(document["_id"]) for document in documents]
-    
-    return_data = {
-        "questions": ids
-    }
-    
-    return jsonify(return_data)
-    
+
 @app.route('/create_question', methods=['POST'])
 def create_question():
     print("accepting create_question request")
