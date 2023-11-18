@@ -2,21 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hku_guesser/initialize.dart';
 import 'package:hku_guesser/transition.dart';
 import 'package:hku_guesser/image.dart';
 import 'package:hku_guesser/question_database.dart';
 import 'package:hku_guesser/game_state.dart';
 import 'constants.dart';
 import 'dart:async';
+import 'dart:math';
 
 class GamePage extends StatefulWidget {
   final GameState gameState;
   const GamePage({Key? key, required this.gameState}) : super(key: key);
-
-  void handleDisposeTimer(int remainingTime) {
-    // Do something with the remaining time value
-    print('Remaining time: $remainingTime');
-  }
 
   @override
   State<StatefulWidget> createState() => _GamePageState();
@@ -48,9 +45,9 @@ class _GamePageState extends State<GamePage> {
   @override
   void initState() {
     super.initState();
-    const zoomFactor = 0.2;
-    const xTranslate = 0.0;
-    const yTranslate = 0.0;
+    const zoomFactor = 0.31;
+    const xTranslate = 32.0;
+    const yTranslate = 50.0;
     viewTransformationController.value.setEntry(0, 0, zoomFactor);
     viewTransformationController.value.setEntry(1, 1, zoomFactor);
     viewTransformationController.value.setEntry(2, 2, zoomFactor);
@@ -81,8 +78,7 @@ class _GamePageState extends State<GamePage> {
                       top: 0,
                       right: 0,
                       child: TimerWidget(
-                        onDispose: widget.handleDisposeTimer,
-                        duration: widget.gameState.roundTime,
+                        gameState: widget.gameState,
                       ),
                     ),
                   ],
@@ -130,7 +126,6 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   var question_index;
-  List<Question> questions = [];
   var n = 1;
   Future<void> _asyncWork = Future<void>.value(null);
 
@@ -140,8 +135,8 @@ class _QuestionPageState extends State<QuestionPage> {
   void initState() {
     super.initState();
     _asyncWork = _performAsyncWork();
-    const zoomFactor = 0.8;
-    const xTranslate = 250.0;
+    const zoomFactor = 1.0;
+    const xTranslate = 500.0;
     const yTranslate = 200.0;
     viewTransformationController.value.setEntry(0, 0, zoomFactor);
     viewTransformationController.value.setEntry(1, 1, zoomFactor);
@@ -153,14 +148,9 @@ class _QuestionPageState extends State<QuestionPage> {
   Future<void> _performAsyncWork() async {
     final check = await QuestionDatabase.instance.getQuestions();
     if (check.isEmpty) {
-      await QuestionDatabase.instance.insertQuestion(
-          jsonEncode({
-            "x-coordinate": "1250.6396965865638",
-            "y-coordinate": "2192.9494311002054",
-            "floor": "G"
-          }),
-          await saveImageToStorageFromAssets('assets/images/image1.jpg', n));
+      await initailize_question(n);
     }
+
     await someAsyncOperation();
     setState(() {});
   }
@@ -189,8 +179,9 @@ class _QuestionPageState extends State<QuestionPage> {
             return const Center(child: CircularProgressIndicator());
           } else {
             var state = context.findAncestorStateOfType<_GamePageState>();
-            var image = Image.file(File(questions[0].imagePath));
-            question_index = state?.question_index;
+            var image = Image.file(File(state!
+                .gameState.questions[state.gameState.roundNum - 1].imagePath));
+            question_index = state.question_index;
             return Scaffold(
               body: Center(
                 child: InteractiveViewer(
@@ -268,7 +259,7 @@ class _AnswerPageState extends State<AnswerPage> {
           maxScale: 3,
           child: GestureDetector(
             // store the position of the tap
-            onTapDown: (details) {
+            onTapUp: (details) {
               setState(() {
                 x = details.localPosition.dx;
                 y = details.localPosition.dy;
@@ -276,6 +267,7 @@ class _AnswerPageState extends State<AnswerPage> {
                 state?.y = y;
               });
               print("x: " + x.toString() + " y: " + y.toString());
+              // print(state?.viewTransformationController.value);
             },
             child: CustomPaint(
               foregroundPainter: CirclePainter(x, y),
@@ -348,6 +340,8 @@ class _AnswerPageState extends State<AnswerPage> {
                     child: GestureDetector(
                       onTap: () {
                         print("submit");
+                        calculateScore(state.gameState, state.floor);
+                        print(state.gameState.questions.length);
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -371,33 +365,10 @@ class _AnswerPageState extends State<AnswerPage> {
   }
 }
 
-class CirclePainter extends CustomPainter {
-  var x;
-  var y;
-
-  CirclePainter(this.x, this.y);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.red
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(Offset(x, y), 10, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
-  }
-}
-
 class TimerWidget extends StatefulWidget {
-  final void Function(int remainingTime)? onDispose;
-  final int duration;
+  final GameState gameState;
 
-  const TimerWidget({Key? key, this.onDispose, required this.duration})
-      : super(key: key);
+  const TimerWidget({Key? key, required this.gameState}) : super(key: key);
 
   @override
   State<TimerWidget> createState() => _TimerWidgetState();
@@ -406,12 +377,11 @@ class TimerWidget extends StatefulWidget {
 class _TimerWidgetState extends State<TimerWidget> {
   late Timer _timer;
   late int _start;
-  int remainingTime = 0;
 
   @override
   void initState() {
     super.initState();
-    _start = widget.duration;
+    _start = widget.gameState.roundTime;
     startTimer();
   }
 
@@ -421,12 +391,18 @@ class _TimerWidgetState extends State<TimerWidget> {
       oneSec,
       (Timer timer) {
         if (_start == 0) {
-          // TODO: implement timer dispose action
           _timer.cancel();
-          //dispose();
+          widget.gameState.roundScore = 0;
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TransitionPage(
+                        gameState: widget.gameState,
+                      )));
         } else {
           setState(() {
             _start--;
+            widget.gameState.remainingTime = _start;
           });
         }
       },
@@ -435,9 +411,8 @@ class _TimerWidgetState extends State<TimerWidget> {
 
   @override
   void dispose() {
-    _timer.cancel();
-    widget.onDispose?.call(_start);
     super.dispose();
+    _timer.cancel();
   }
 
   @override
