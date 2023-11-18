@@ -35,6 +35,7 @@ class GameState {
   int remainingTime=0;
   final int roundTime; // in seconds
   final transitionTime = 5; // in seconds
+  bool shuffle = false;
 
   GameState({
     this.questions = const [],
