@@ -58,6 +58,12 @@ def export_db():
         "message": "successful"
     })
 
+@app.route('/')
+def root():
+    return jsonify({
+        "message": "hello"
+    })
+
 def init_db(client):
     collection = client.db.questions
     collection.delete_many({})

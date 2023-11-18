@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:hku_guesser/initialize.dart';
+import 'package:hku_guesser/sync_db.dart';
 import 'package:hku_guesser/transition.dart';
 import 'package:hku_guesser/image.dart';
 import 'package:hku_guesser/question_database.dart';
@@ -124,6 +124,7 @@ class QuestionPage extends StatefulWidget {
   State<QuestionPage> createState() => _QuestionPageState();
 }
 
+// FIXME: sync database every time question is started to check for new questions
 class _QuestionPageState extends State<QuestionPage> {
   var question_index;
   var n = 1;
@@ -152,6 +153,7 @@ class _QuestionPageState extends State<QuestionPage> {
     }
     
     await someAsyncOperation();
+    print("setting state");
     setState(() {});
   }
 
@@ -219,13 +221,13 @@ class _AnswerPageState extends State<AnswerPage> {
     var xCoordinate = jsonData['x-coordinate'];
     var yCoordinate = jsonData['y-coordinate'];
     var floor = jsonData['floor'];
-    var xp = (double.parse(xCoordinate) - x).abs() / 10;
-    var yp = (double.parse(yCoordinate) - y).abs() / 10;
+    var xp = (xCoordinate - x).abs() / 10;
+    var yp = (yCoordinate - y).abs() / 10;
     var fp;
     if(floor=="G"){
-      floor="0";
+      floor=0;
     }
-    if (gameFloor==int.parse(floor)) {
+    if (gameFloor==floor) {
       fp = 100;
     } else {
       fp = -100;
