@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'constants.dart';
+import 'package:http/http.dart' as http;
 
 class CreateQuestion extends StatelessWidget {
   final XFile image;
@@ -16,7 +18,7 @@ class CreateQuestion extends StatelessWidget {
       ),
       body: Center(
         child: Container(
-          child: NewAnswerPage(),
+          child: NewAnswerPage(image: image),
         ),
       ),
     );
@@ -24,6 +26,9 @@ class CreateQuestion extends StatelessWidget {
 }
 
 class NewAnswerPage extends StatefulWidget {
+  final XFile image;
+  const NewAnswerPage({super.key, required this.image});
+
   @override
   State<NewAnswerPage> createState() => _AnswerPageState();
 }
@@ -149,9 +154,24 @@ class _AnswerPageState extends State<NewAnswerPage> {
                       ],
                     ),
                     child: GestureDetector(
-                      onTap: () {
-                        print("submit");
-                       // TODO: make new question
+                      onTap: () async {
+                        widget.image.readAsBytes().then((value) async {
+                          final Map<String, dynamic> data = {
+                            'image': base64.encode(value),
+                            'x': x,
+                            'y': y,
+                            'floor': floor,
+                          };
+
+                          final response = await http.post(
+                            Uri.parse("$serverIP/create_question"),
+                            headers: {'Content-Type': 'application/json'},
+                            body: jsonEncode(data)
+                          );
+                        })
+                        .then((value) {
+                          Navigator.pop(context);
+                        });
                       },
                       child: const Center(
                         child: Text(

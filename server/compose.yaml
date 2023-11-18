@@ -1,0 +1,15 @@
+services:
+    backend:
+        build: ./flask
+        stop_signal: SIGINT
+        volumes:
+            - ./flask:/src
+        environment:
+            - FLASK_SERVER_PORT=9090
+        ports:
+            - 9090:9090
+        depends_on:
+            - mongo
+    
+    mongo:
+        image: mongo
