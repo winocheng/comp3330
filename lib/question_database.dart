@@ -19,6 +19,14 @@ class QuestionDatabase {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
+    bool databaseExists = await databaseFactory.databaseExists(path);
+
+    // If the database file exists, delete it
+    if (databaseExists) {
+      await deleteDatabase(path);
+      print("deleted!");
+    }
+    
     return await openDatabase(
       path,
       version: 1,
