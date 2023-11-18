@@ -29,18 +29,18 @@ class QuestionDatabase {
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE questions(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id TEXT PRIMARY KEY,
         jsonText TEXT,
         imagePath TEXT
       )
     ''');
   }
 
-  Future<int> insertQuestion(String jsonText, String imagePath) async {
+  Future<int> insertQuestion(String id, String jsonText, String imagePath) async {
     final db = await instance.database;
     return await db.insert(
       'questions',
-      {'jsonText': jsonText, 'imagePath': imagePath},
+      {'id': id, 'jsonText': jsonText, 'imagePath': imagePath},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }

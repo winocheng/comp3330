@@ -1,5 +1,5 @@
 class Question {
-  final int id;
+  final String id;
   final String jsonText;
   final String imagePath;
 
