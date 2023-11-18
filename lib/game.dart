@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hku_guesser/initialize.dart';
 import 'package:hku_guesser/transition.dart';
 import 'package:hku_guesser/image.dart';
 import 'package:hku_guesser/question_database.dart';
@@ -125,7 +126,6 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   var question_index;
-  List<Question> questions = [];
   var n = 1;
   Future<void> _asyncWork = Future<void>.value(null);
 
@@ -148,25 +148,25 @@ class _QuestionPageState extends State<QuestionPage> {
   Future<void> _performAsyncWork() async {
     final check = await QuestionDatabase.instance.getQuestions();
     if (check.isEmpty) {
-      await QuestionDatabase.instance.insertQuestion(
-          jsonEncode({
-            "x-coordinate": "1250.6396965865638",
-            "y-coordinate": "2192.9494311002054",
-            "floor": "G"
-          }),
-          await saveImageToStorageFromAssets('assets/images/image1.jpg', n));
+      await initailize_question(n);
     }
+    
     await someAsyncOperation();
     setState(() {});
   }
 
   Future<void> someAsyncOperation() async {
-    final loadedQuestions = await QuestionDatabase.instance.getQuestions();
-    setState(() {
-      questions = loadedQuestions;
-      context.findAncestorStateOfType<_GamePageState>()!.gameState.questions =
+    if(context.findAncestorStateOfType<_GamePageState>()!.gameState.shuffle == false){
+      final loadedQuestions = await QuestionDatabase.instance.getQuestions();
+      loadedQuestions.shuffle();
+      setState(() {
+        context.findAncestorStateOfType<_GamePageState>()!.gameState.questions =
           loadedQuestions;
-    });
+        context.findAncestorStateOfType<_GamePageState>()!.gameState.shuffle =
+          true;
+      });
+    }
+
   }
 
   @override
@@ -180,9 +180,9 @@ class _QuestionPageState extends State<QuestionPage> {
             return const Center(child: CircularProgressIndicator());
           } else {
             var state = context.findAncestorStateOfType<_GamePageState>();
-            var image = Image.file(File(questions[0].imagePath));
-            question_index = state?.question_index;
-            return Scaffold(
+            var image = Image.file(File(state!.gameState.questions[state.gameState.roundNum - 1].imagePath));
+            question_index = state.question_index;
+             return Scaffold(
               body: Center(
                 child: InteractiveViewer(
                   transformationController: viewTransformationController,
