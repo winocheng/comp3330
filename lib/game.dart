@@ -60,7 +60,7 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Game'),
+        title: Text('Round ${widget.gameState.roundNum}'),
         backgroundColor: mainColor,
       ),
 
