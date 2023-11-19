@@ -60,7 +60,7 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Game'),
+        title: Text('Round ${widget.gameState.roundNum}'),
         backgroundColor: mainColor,
       ),
 
@@ -152,24 +152,22 @@ class _QuestionPageState extends State<QuestionPage> {
     } else {
       await updateQuestion();
     }
-    
-    print("continue");
+
     await someAsyncOperation();
     setState(() {});
   }
 
   Future<void> someAsyncOperation() async {
-    if(context.findAncestorStateOfType<_GamePageState>()!.gameState.shuffle == false){
+    if (!context.findAncestorStateOfType<_GamePageState>()!.gameState.shuffle) {
       final loadedQuestions = await QuestionDatabase.instance.getQuestions();
       loadedQuestions.shuffle();
       setState(() {
         context.findAncestorStateOfType<_GamePageState>()!.gameState.questions =
-          loadedQuestions;
+            loadedQuestions;
         context.findAncestorStateOfType<_GamePageState>()!.gameState.shuffle =
-          true;
+            true;
       });
     }
-
   }
 
   @override
@@ -186,7 +184,7 @@ class _QuestionPageState extends State<QuestionPage> {
             var imagefile = File(state!.gameState.questions[state.gameState.roundNum - 1].imagePath);
             var image = Image.file(imagefile,height: 900,);
             question_index = state.question_index;
-             return Scaffold(
+            return Scaffold(
               body: Center(
                 child: InteractiveViewer(
                   transformationController: viewTransformationController,
@@ -215,26 +213,24 @@ class _AnswerPageState extends State<AnswerPage> {
 
   void calculateScore(GameState gameState, var gameFloor) {
     var base = 1000;
-    var jsonData = jsonDecode(gameState.questions[
-      0
-      // gameState.roundNum-1
-      ].jsonText);
+    var jsonData =
+        jsonDecode(gameState.questions[gameState.roundNum - 1].jsonText);
     var xCoordinate = jsonData['x-coordinate'];
     var yCoordinate = jsonData['y-coordinate'];
     var floor = jsonData['floor'];
     var xp = (xCoordinate - x).abs() / 10;
     var yp = (yCoordinate - y).abs() / 10;
     var fp;
-    if(floor=="G"){
-      floor=0;
+    if(floor == "G"){
+      floor = 0;
     }
-    if (gameFloor==floor) {
+    if (gameFloor == floor) {
       fp = 100;
     } else {
       fp = -100;
     }
     gameState.roundScore =
-        ((base - xp - yp + fp) * (gameState.remainingTime/100)).toInt();
+        ((base - xp - yp + fp) * (gameState.remainingTime / 100)).toInt();
     gameState.totalScore += gameState.roundScore;
   }
 
