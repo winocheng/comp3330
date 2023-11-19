@@ -58,6 +58,12 @@ def export_db():
         "message": "successful"
     })
 
+@app.route('/')
+def root():
+    return jsonify({
+        "message": "hello"
+    })
+
 def init_db(client):
     collection = client.db.questions
     collection.delete_many({})
@@ -72,10 +78,25 @@ def init_db(client):
             "floor": "G"
         })
     '''
+
     if os.path.exists("questions.json"):
         with open("questions.json", "r") as file:
             for document in loads(file.read()):
                 collection.insert_one(document)
+    elif os.path.isfile("questions/question.json"):
+        with open("questions/question.json", "r") as file:
+            for document in json.load(file):
+                print(document)
+                with open(document["img_pth"], "rb") as imgfile:
+                    data = {
+                        "x": document["x"],
+                        "y": document["y"],
+                        "floor": document["floor"],
+                        "image": imgfile.read()
+                    }
+
+                    collection.insert_one(data)
+
 
 
 if __name__ == "__main__":

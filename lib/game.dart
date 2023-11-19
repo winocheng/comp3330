@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:hku_guesser/initialize.dart';
+import 'package:hku_guesser/sync_db.dart';
 import 'package:hku_guesser/transition.dart';
 import 'package:hku_guesser/image.dart';
 import 'package:hku_guesser/question_database.dart';
@@ -124,6 +124,7 @@ class QuestionPage extends StatefulWidget {
   State<QuestionPage> createState() => _QuestionPageState();
 }
 
+// FIXME: sync database every time question is started to check for new questions
 class _QuestionPageState extends State<QuestionPage> {
   var question_index;
   var n = 1;
@@ -136,7 +137,7 @@ class _QuestionPageState extends State<QuestionPage> {
     super.initState();
     _asyncWork = _performAsyncWork();
     const zoomFactor = 1.0;
-    const xTranslate = 500.0;
+    const xTranslate = 0.0;
     const yTranslate = 200.0;
     viewTransformationController.value.setEntry(0, 0, zoomFactor);
     viewTransformationController.value.setEntry(1, 1, zoomFactor);
@@ -179,13 +180,14 @@ class _QuestionPageState extends State<QuestionPage> {
             return const Center(child: CircularProgressIndicator());
           } else {
             var state = context.findAncestorStateOfType<_GamePageState>();
-            var image = Image.file(File(state!
-                .gameState.questions[state.gameState.roundNum - 1].imagePath));
+            var imagefile = File(state!.gameState.questions[state.gameState.roundNum - 1].imagePath);
+            var image = Image.file(imagefile,height: 900,);
             question_index = state.question_index;
             return Scaffold(
               body: Center(
                 child: InteractiveViewer(
                   transformationController: viewTransformationController,
+                  minScale: 0.01,
                   constrained: false,
                   child: image,
                 ),
@@ -215,13 +217,13 @@ class _AnswerPageState extends State<AnswerPage> {
     var xCoordinate = jsonData['x-coordinate'];
     var yCoordinate = jsonData['y-coordinate'];
     var floor = jsonData['floor'];
-    var xp = (double.parse(xCoordinate) - x).abs() / 10;
-    var yp = (double.parse(yCoordinate) - y).abs() / 10;
+    var xp = (xCoordinate - x).abs() / 10;
+    var yp = (yCoordinate - y).abs() / 10;
     var fp;
-    if (floor == "G") {
-      floor = "0";
+    if(floor == "G"){
+      floor = 0;
     }
-    if (gameFloor == int.parse(floor)) {
+    if (gameFloor == floor) {
       fp = 100;
     } else {
       fp = -100;
