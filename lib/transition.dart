@@ -237,8 +237,8 @@ class _MapLocationState extends State<MapLocation> {
   void initState() {
     super.initState();
     var jsonData = jsonDecode(widget.q.jsonText);
-    x = double.parse(jsonData['x-coordinate']);
-    y = double.parse(jsonData['y-coordinate']);
+    x = jsonData['x-coordinate'];
+    y = jsonData['y-coordinate'];
     cropImage();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       paintCircle();
