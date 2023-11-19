@@ -2,7 +2,7 @@
 import os
 import json
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from pymongo import MongoClient
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
@@ -26,7 +26,7 @@ def get_question():
         "x": document["x"],
         "y": document["y"],
         "floor": document["floor"],
-        "image": b64encode(document["image"]).decode('utf-8')
+        # "image": b64encode(document["image"]).decode('utf-8')
     } for document in documents]
     
     return jsonify(return_data)
@@ -57,6 +57,16 @@ def export_db():
     return jsonify({
         "message": "successful"
     })
+
+@app.route('/image/<string:qid>', methods=['GET'])
+def get_image(qid):
+    document = client.db.questions.find_one({"_id": ObjectId(qid)})
+    
+    if document is None:
+        return jsonify({'error': 'Image not found'}), 404
+    
+    headers = {'Content-Type': 'image/jpeg'}
+    return Response(document["image"], headers=headers)
 
 @app.route('/')
 def root():
