@@ -34,7 +34,7 @@ class GameState {
   int roundScore = 0;
   int remainingTime = 0;
   final int roundTime; // in seconds
-  final transitionTime = 99; // in seconds
+  final transitionTime = 10; // in seconds
   bool shuffle = false;
 
   GameState({
