@@ -60,4 +60,9 @@ class QuestionDatabase {
       maps.map((map) => Question.fromMap(map)),
     );
   }
+
+  Future<List<Map<String, Object?>>> doQuery(String sql) async {
+    final db = await instance.database;
+    return db.rawQuery(sql);
+  }
 }

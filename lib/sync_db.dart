@@ -81,3 +81,27 @@ Future<void> initailize_question(var n) async {
     await saveImageToStorageFromAssets('assets/images/image5.jpg', n));
   }
   }
+
+Future<void> updateQuestion() async {
+  List<Map> result = await QuestionDatabase.instance.doQuery("SELECT MAX(id) AS max_id FROM questions");
+  bool isConnected = await checkServerConnection(serverIP);
+
+  if (isConnected) {
+    final response = await http.get(Uri.parse("$serverIP/sync_question?after=${result[0]['max_id']}"));
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      
+      for (var question in jsonData) {
+        await QuestionDatabase.instance.insertQuestion(question["id"],
+        jsonEncode({
+          "x-coordinate": question["x"],
+          "y-coordinate": question["y"],
+          "floor": question["floor"]
+        }),
+        await saveImageToStorageFromBytes(question["image"], question["id"]));
+      }
+    }
+
+  }
+
+}

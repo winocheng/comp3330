@@ -124,7 +124,6 @@ class QuestionPage extends StatefulWidget {
   State<QuestionPage> createState() => _QuestionPageState();
 }
 
-// FIXME: sync database every time question is started to check for new questions
 class _QuestionPageState extends State<QuestionPage> {
   var question_index;
   var n = 1;
@@ -150,8 +149,11 @@ class _QuestionPageState extends State<QuestionPage> {
     final check = await QuestionDatabase.instance.getQuestions();
     if (check.isEmpty) {
       await initailize_question(n);
+    } else {
+      await updateQuestion();
     }
     
+    print("continue");
     await someAsyncOperation();
     setState(() {});
   }
