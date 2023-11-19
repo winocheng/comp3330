@@ -8,7 +8,8 @@ import 'package:http/http.dart' as http;
 
 Future<bool> checkServerConnection(String serverUrl) async {
   try {
-    final response = await http.get(Uri.parse(serverUrl));
+    final response = await http.get(Uri.parse(serverUrl))
+    .timeout(const Duration(seconds: 2));
     return response.statusCode == 200;
   } catch (e) {
     return false;
@@ -17,7 +18,6 @@ Future<bool> checkServerConnection(String serverUrl) async {
 
 Future<void> initailize_question(var n) async {
   bool isConnected = await checkServerConnection(serverIP);
-  
   if (isConnected) {
     final response = await http.get(Uri.parse("$serverIP/sync_question"));
     if (response.statusCode == 200) {
