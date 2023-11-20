@@ -39,12 +39,12 @@ class QuestionDatabase {
       CREATE TABLE questions(
         id TEXT PRIMARY KEY,
         jsonText TEXT,
-        imagePath TEXT
+        imagePath TEXT NULL
       )
     ''');
   }
 
-  Future<int> insertQuestion(String id, String jsonText, String imagePath) async {
+  Future<int> insertQuestion(String id, String jsonText, String? imagePath) async {
     final db = await instance.database;
     return await db.insert(
       'questions',

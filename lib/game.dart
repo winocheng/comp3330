@@ -126,7 +126,6 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   var question_index;
-  var n = 1;
   Future<void> _asyncWork = Future<void>.value(null);
 
   final viewTransformationController = TransformationController();
@@ -134,7 +133,6 @@ class _QuestionPageState extends State<QuestionPage> {
   @override
   void initState() {
     super.initState();
-    _asyncWork = _performAsyncWork();
     const zoomFactor = 1.0;
     const xTranslate = 0.0;
     const yTranslate = 200.0;
@@ -145,58 +143,21 @@ class _QuestionPageState extends State<QuestionPage> {
     viewTransformationController.value.setEntry(1, 3, -yTranslate);
   }
 
-  Future<void> _performAsyncWork() async {
-    final check = await QuestionDatabase.instance.getQuestions();
-    if (check.isEmpty) {
-      await initailize_question(n);
-    } else {
-      await updateQuestion();
-    }
-
-    await someAsyncOperation();
-    setState(() {});
-  }
-
-  Future<void> someAsyncOperation() async {
-    if (!context.findAncestorStateOfType<_GamePageState>()!.gameState.shuffle) {
-      final loadedQuestions = await QuestionDatabase.instance.getQuestions();
-      loadedQuestions.shuffle();
-      setState(() {
-        context.findAncestorStateOfType<_GamePageState>()!.gameState.questions =
-            loadedQuestions;
-        context.findAncestorStateOfType<_GamePageState>()!.gameState.shuffle =
-            true;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    var state = context.findAncestorStateOfType<_GamePageState>();
+    var imagefile = File(state!.gameState.questions[state.gameState.roundNum - 1].imagePath);
+    var image = Image.file(imagefile,height: 900,);
+    question_index = state.question_index;
     return Scaffold(
-      body: FutureBuilder(
-        future: _asyncWork,
-        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Show a loading indicator while the work is in progress
-            return const Center(child: CircularProgressIndicator());
-          } else {
-            var state = context.findAncestorStateOfType<_GamePageState>();
-            var imagefile = File(state!.gameState.questions[state.gameState.roundNum - 1].imagePath);
-            var image = Image.file(imagefile,height: 900,);
-            question_index = state.question_index;
-            return Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  transformationController: viewTransformationController,
-                  minScale: 0.01,
-                  constrained: false,
-                  child: image,
-                ),
-              ),
-            );
-          }
-        },
-      ),
+      body: Center(
+        child: InteractiveViewer(
+          transformationController: viewTransformationController,
+          minScale: 0.01,
+          constrained: false,
+          child: image,
+        ),
+      )
     );
   }
 }
