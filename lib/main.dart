@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hku_guesser/game.dart';
+import 'package:hku_guesser/constants.dart';
 import 'package:hku_guesser/game_start.dart';
-import 'package:hku_guesser/game_state.dart';
-import 'constants.dart';
-import 'camera.dart';
+import 'package:hku_guesser/ranking.dart';
+import 'package:hku_guesser/camera.dart';
 
 void main() {
   runApp(const HKUGuesserApp());
@@ -41,7 +40,7 @@ class HomePage extends StatelessWidget {
     ),
   );
 
-  GestureDetector buildButton(VoidCallback onTap) {
+  GestureDetector buildButton(String label, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -56,7 +55,7 @@ class HomePage extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            'Start',
+          label,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: fontColor,
@@ -85,14 +84,19 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.only(left: 24.0, right:24.0),
             children: <Widget>[
               logo,
-              const SizedBox(height: 100),
-              buildButton(() {
+              const SizedBox(height: 80),
+              buildButton("Start", () {
                 Navigator.push(
                   context,
                     MaterialPageRoute(
                         builder: (context) =>
                             LoadingPage())
                 );
+              }),
+              const SizedBox(height: 20),
+              buildButton("Leaderboard", () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => RankingPage()));
               }),
             ],
           ),

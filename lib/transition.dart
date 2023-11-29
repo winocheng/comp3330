@@ -3,8 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:hku_guesser/constants.dart';
-import 'package:hku_guesser/game.dart';
 import 'package:hku_guesser/game_state.dart';
+import 'package:hku_guesser/game.dart';
+import 'package:hku_guesser/ranking.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 
@@ -208,12 +209,98 @@ class Result extends StatelessWidget {
                       ),
                       onPressed: () {
                         print("Quit");
-                        Navigator.pop(context);
+                        _exitDialogBuilder(context).then((toRanking) {
+                          if (toRanking == null) {
+                            return;
+                          }
+                          if (toRanking) {
+                            _rankingDialogBuilder(context).then((name) {
+                              if (name == null) {
+                                return;
+                              }
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => RankingPage(
+                                          name: name,
+                                          score: gameState.totalScore)));
+                            });
+                          } else {
+                            Navigator.pop(context);
+                          }
+                        });
                       },
                     ),
                   ),
                 ])));
   }
+
+  Future<bool?> _exitDialogBuilder(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Ranking'),
+          content: const Text(
+            'Do you want to upload your score?\n'
+            'You can see how well you performed against other players!',
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Yes'),
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<String?> _rankingDialogBuilder(BuildContext context) {
+    TextEditingController textController = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Player name'),
+          content: TextField(
+            controller: textController,
+            maxLength: 16,
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              labelText: 'Enter your name:',
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Confirm'),
+              onPressed: () {
+                Navigator.pop(context, textController.text);
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
 }
 
 class MapLocation extends StatefulWidget {
