@@ -103,7 +103,7 @@ class HomePage extends StatelessWidget {
               buildButton(() async {
                 final day = await QuestionDatabase.instance.doQuery("SELECT * FROM daily");
                 initializeTimeZones();
-                final hk = tz.getLocation('Asia/Hong_Kong');
+                final hk = tz.getLocation(timeZoneName);
                 final now = tz.TZDateTime.now(hk);
                 print(DateFormat('dd/MM/yy').format(now));
                 if (day.isNotEmpty && day[0]["date"] == DateFormat('dd/MM/yy').format(now)) {
