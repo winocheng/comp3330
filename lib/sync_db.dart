@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:hku_guesser/constants.dart';
+import 'package:hku_guesser/game_state.dart';
 import 'package:hku_guesser/image.dart';
 import 'package:hku_guesser/question_database.dart';
 import 'dart:async';
@@ -134,4 +135,30 @@ Future<void> updateQuestion() async {
 
   }
 
+}
+
+Future<List<Question>?> getDailyQuestion() async {
+  bool isConnected = await checkServerConnection(serverIP);
+
+  if (isConnected) {
+    final response = await http.get(Uri.parse("$serverIP/daily"));
+    if (response.statusCode == 200) {
+      final question = json.decode(response.body);
+      QuestionDatabase.instance.doQuery('''
+        REPLACE INTO daily (id, date)
+        VALUES ('today', '${question["date"]}')
+      ''');
+
+      final image_byte = await downloadImage(question["id"]);
+      assert(image_byte != null, 'failed to get image');
+
+      final imagePath = await saveImageToStorageFromBytes(image_byte!, question["id"]);
+
+      return [Question(id: question["id"], jsonText: jsonEncode({
+          "x-coordinate": question["x"],
+          "y-coordinate": question["y"],
+          "floor": question["floor"]
+        }), imagePath: imagePath)];
+    }
+  }
 }

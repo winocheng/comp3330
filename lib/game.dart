@@ -26,6 +26,7 @@ class _GamePageState extends State<GamePage> {
   var x = -100.0;
   var y = -100.0;
   var floor = 0;
+  late String title;
 
   var pages = [
     QuestionPage(),
@@ -54,13 +55,18 @@ class _GamePageState extends State<GamePage> {
     viewTransformationController.value.setEntry(0, 3, -xTranslate);
     viewTransformationController.value.setEntry(1, 3, -yTranslate);
     gameState = widget.gameState;
+    if (widget.gameState.totalRound == 1) {
+      title = "Daily Challenge";
+    } else {
+      title = 'Round ${widget.gameState.roundNum}';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Round ${widget.gameState.roundNum}'),
+        title: Text(title),
         backgroundColor: mainColor,
       ),
 

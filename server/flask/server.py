@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import os
 import json
+import random
+from datetime import datetime
 
+from pytz import timezone
 from flask import Flask, jsonify, request, Response
 from pymongo import MongoClient
 from bson.json_util import dumps, loads
@@ -68,6 +71,49 @@ def get_image(qid):
     headers = {'Content-Type': 'image/jpeg'}
     return Response(document["image"], headers=headers)
 
+@app.route('/daily', methods=['GET'])
+def get_daily():
+    ids = [str(document["_id"]) for document in client.db.questions.find({}, {"_id":1})]
+    current_time = datetime.now(timezone('Asia/Hong_Kong'))
+    if "daily" not in client.db.list_collection_names():
+        collection = client.db.daily
+        random.shuffle(ids)
+        collection.insert_one({
+            "ids": ids,
+            "date": current_time.strftime('%d/%m/%y'),
+            "index": 0
+        })
+    else:
+        collection = client.db.daily
+        document = collection.find_one({})
+        new_ids = [idx for idx in ids if idx not in [idx for idx in document["ids"]]]
+        used_ids, unused_ids = document["ids"][:document["index"]+1], document["ids"][document["index"]+1:]
+        unused_ids = unused_ids + new_ids
+        random.shuffle(unused_ids)
+
+        document["ids"] = used_ids + unused_ids
+        collection.replace_one({"_id": document["_id"]}, document)
+
+    document = collection.find_one({})
+    if document["date"] != current_time.strftime('%d/%m/%y'):
+        document["date"] = current_time.strftime('%d/%m/%y')
+        document["index"] += 1
+        document["index"] %= len(document["ids"])
+        collection.replace_one({"_id": document["_id"]}, document)
+
+    app.logger.info(document)
+    result = client.db.questions.find_one({"_id": ObjectId(document["ids"][document["index"]])})
+
+    return_data = {
+        "id": str(result["_id"]),
+        "x": result["x"],
+        "y": result["y"],
+        "floor": result["floor"],
+        "date": current_time.strftime('%d/%m/%y')
+    }
+        
+    return jsonify(return_data)
+
 @app.route('/')
 def root():
     return jsonify({
@@ -77,6 +123,7 @@ def root():
 def init_db(client):
     collection = client.db.questions
     collection.delete_many({})
+    client.db.daily.drop()
     
     '''
     with open("27_hku_hong-kong-university_colonial-heritage_zolima-citymag.jpg", "rb") as file:
@@ -111,6 +158,8 @@ def init_db(client):
 
 if __name__ == "__main__":
     init_db(client)
+    print(f"collections: {client.db.list_collection_names()}")
+    current_time = datetime.now(timezone('Asia/Hong_Kong'))
+    print(current_time.strftime('%d/%m/%y'))
 
-    
     app.run(host='0.0.0.0', port=os.environ.get("FLASK_SERVER_PORT", 9090), debug=True)
