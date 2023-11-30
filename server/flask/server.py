@@ -5,7 +5,7 @@ import random
 from datetime import datetime
 
 from pytz import timezone
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request, Response, send_file
 from pymongo import MongoClient
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
@@ -57,9 +57,7 @@ def export_db():
     with open("questions.json", "w") as file:
         json.dump(json.loads(dumps(documents)), file)
     
-    return jsonify({
-        "message": "successful"
-    })
+    return send_file("questions.json", as_attachment=True)
 
 @app.route('/image/<string:qid>', methods=['GET'])
 def get_image(qid):
