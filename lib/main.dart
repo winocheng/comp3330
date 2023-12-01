@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hku_guesser/game.dart';
 import 'package:hku_guesser/game_start.dart';
 import 'package:hku_guesser/game_state.dart';
+import 'package:hku_guesser/question_database.dart';
 import 'constants.dart';
 import 'camera.dart';
+import 'package:intl/intl.dart';
+import 'package:timezone/data/latest.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 void main() {
   runApp(const HKUGuesserApp());
@@ -41,7 +46,7 @@ class HomePage extends StatelessWidget {
     ),
   );
 
-  GestureDetector buildButton(VoidCallback onTap) {
+  GestureDetector buildButton(VoidCallback onTap, String btnText) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -56,7 +61,7 @@ class HomePage extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            'Start',
+            btnText,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: fontColor,
@@ -85,15 +90,33 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.only(left: 24.0, right:24.0),
             children: <Widget>[
               logo,
-              const SizedBox(height: 100),
+              const SizedBox(height: 40),
               buildButton(() {
                 Navigator.push(
                   context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            LoadingPage())
+                            LoadingPage(gameMode: "Normal"))
                 );
-              }),
+              }, "Start"),
+              const SizedBox(height: 20),
+              buildButton(() async {
+                final day = await QuestionDatabase.instance.doQuery("SELECT * FROM daily");
+                initializeTimeZones();
+                final hk = tz.getLocation(timeZoneName);
+                final now = tz.TZDateTime.now(hk);
+                print(DateFormat('dd/MM/yy').format(now));
+                if (day.isNotEmpty && day[0]["date"] == DateFormat('dd/MM/yy').format(now)) {
+                  Fluttertoast.showToast(msg: "You have already attempted today's challenge!");
+                } else {
+                  Navigator.push(
+                    context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              LoadingPage(gameMode: "Daily"))
+                  );
+                }
+              }, "Daily Challenge"),
             ],
           ),
         ),
