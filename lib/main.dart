@@ -25,8 +25,14 @@ class HKUGuesserApp extends StatelessWidget {
 
 class HomePage extends StatelessWidget {
   final logo = SizedBox(
-    width: 274,
-    height: 186,
+    width: 200,
+    height: 200,
+    child: Image.asset('assets/images/icon.png'),
+  );
+
+  final appTitle = SizedBox(
+    width: 250,
+    height: 150,
     child: Text(
       'HKU\nGuesser',
       textAlign: TextAlign.center,
@@ -84,7 +90,8 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.only(left: 24.0, right:24.0),
             children: <Widget>[
               logo,
-              const SizedBox(height: 80),
+              appTitle,
+              const SizedBox(height: 50),
               buildButton("Start", () {
                 Navigator.push(
                   context,
