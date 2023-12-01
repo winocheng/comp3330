@@ -147,18 +147,16 @@ class _CountdownState extends State<Countdown> {
   Widget build(BuildContext context) {
     final seconds = _myDuration.inSeconds.toString();
     return Stack(
+      alignment: Alignment(0, -0.3),
       children: [
         Image.asset('assets/images/location.png'),
-        Align(
-          alignment: Alignment(0, -0.3),
-          child: Text(
+        Text(
             seconds,
             style: TextStyle(
               fontSize: 60,
               fontWeight: FontWeight.w700,
             ),
-            textAlign: TextAlign.center,
-          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -191,11 +189,11 @@ class Result extends StatelessWidget {
                           color: highlightColor1,
                           fontSize: 45)),
                   Text(
-                      'You score ${gameState.roundScore} this round!',
+                      'You scored ${gameState.roundScore} this round!',
                       style: TextStyle(fontSize: 22, height: 2)),
                   MapLocation(q: gameState.questions[gameState.roundNum - 2]),
                   Text(
-                      'In ${gameState.totalRound} rounds, you score ${gameState.totalScore}!',
+                      'In ${gameState.totalRound} rounds, you scored ${gameState.totalScore}!',
                       style: TextStyle(fontSize: 22)),
                   Container(
                     margin: EdgeInsets.only(top: 50),

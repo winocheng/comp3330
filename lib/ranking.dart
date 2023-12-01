@@ -7,7 +7,7 @@ class RankingPage extends StatefulWidget {
   const RankingPage({Key? key, this.name, this.score}) : super(key: key);
 
   @override
-  _RankingPageState createState() => _RankingPageState();
+  State<RankingPage> createState() => _RankingPageState();
 }
 
 class _RankingPageState extends State<RankingPage> {
@@ -28,6 +28,7 @@ class _RankingPageState extends State<RankingPage> {
     }
     leaderboardScores.sort((a, b) => b.score.compareTo(a.score));
     setState(() {
+      _rankingType = type;
       _leaderboardScores = leaderboardScores;
     });
   }
@@ -62,14 +63,13 @@ class _RankingPageState extends State<RankingPage> {
               ),
             ),
             const SizedBox(height: 20),
-            Container(
+            SizedBox(
               height: 500,
               width: 500,
               child: SingleChildScrollView(
                 child: DefaultTextStyle(
                   style: const TextStyle(color: Colors.black),
                   child: DataTable(
-                      //dataTextStyle: const TextStyle(color: Colors.white),
                       columns: const [
                         DataColumn(
                           label: Text('Rank'),
@@ -106,27 +106,29 @@ class _RankingPageState extends State<RankingPage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
           currentIndex: _rankingType,
-          onTap: (int index) {
-            setState(() {
-              _rankingType = index;
-            });
-            getLeaderboardScores(_rankingType);
-          },
+          onTap: getLeaderboardScores,
+          iconSize: 36.0,
           selectedItemColor: highlightColor1,
           unselectedItemColor: highlightColor2,
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(
-                Icons.bar_chart_sharp,
-                size: 36.0,
-              ),
+              icon: Icon(Icons.bar_chart_sharp),
               label: "General",
             ),
             BottomNavigationBarItem(
-              icon: Icon(
-                Icons.star,
-                size: 36.0,
-              ),
+              icon: Stack(alignment: Alignment(0, 0.5), children: [
+                Icon(Icons.calendar_today_rounded),
+                Text(
+                  DateTime.now().day.toString(),
+                  style: TextStyle(
+                    color: _rankingType == daily
+                        ? highlightColor1
+                        : highlightColor2,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                  ),
+                ),
+              ]),
               label: "Daily",
             ),
           ]),
