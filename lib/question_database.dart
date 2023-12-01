@@ -42,6 +42,7 @@ class QuestionDatabase {
         imagePath TEXT NULL
       )
     ''');
+    await db.execute('CREATE TABLE daily(id TEXT PRIMARY KEY, date TEXT)');
   }
 
   Future<int> insertQuestion(String id, String jsonText, String? imagePath) async {

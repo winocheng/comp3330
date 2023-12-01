@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hku_guesser/constants.dart';
 import 'package:hku_guesser/game_start.dart';
 import 'package:hku_guesser/ranking.dart';
+import 'package:hku_guesser/question_database.dart';
 import 'package:hku_guesser/camera.dart';
+import 'package:intl/intl.dart';
+import 'package:timezone/data/latest.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 void main() {
   runApp(const HKUGuesserApp());
@@ -97,8 +102,26 @@ class HomePage extends StatelessWidget {
                   context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            LoadingPage())
+                            LoadingPage(gameMode: "Normal"))
                 );
+              }),
+              const SizedBox(height: 20),
+              buildButton("Daily Challenge", () async {
+                final day = await QuestionDatabase.instance.doQuery("SELECT * FROM daily");
+                initializeTimeZones();
+                final hk = tz.getLocation(timeZoneName);
+                final now = tz.TZDateTime.now(hk);
+                print(DateFormat('dd/MM/yy').format(now));
+                if (day.isNotEmpty && day[0]["date"] == DateFormat('dd/MM/yy').format(now)) {
+                  Fluttertoast.showToast(msg: "You have already attempted today's challenge!");
+                } else {
+                  Navigator.push(
+                    context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              LoadingPage(gameMode: "Daily"))
+                  );
+                }
               }),
               const SizedBox(height: 20),
               buildButton("Leaderboard", () {

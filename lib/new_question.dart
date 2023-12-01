@@ -196,6 +196,8 @@ class _AnswerPageState extends State<NewAnswerPage> {
                             Fluttertoast.showToast(
                               msg: "Error Connecting to Server"
                             );
+                          } catch (e) {
+                            print(e);
                           }
                         })
                         .then((value) {
