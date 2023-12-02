@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hku_guesser/constants.dart';
 import 'package:hku_guesser/game_state.dart';
 import 'package:hku_guesser/image.dart';
@@ -95,10 +96,12 @@ Future<void> initailize_question({var n = 1}) async {
           }),
           await saveImageToStorageFromBytes(image_byte!, question["id"]));
         }
+        Fluttertoast.showToast(msg: "Successfully Retrieve Questions");
       }
     } 
     catch (e) {
       print(e);
+      Fluttertoast.showToast(msg: "Error Connecting to Server");
       await initLocalData(n);
     }
   } else {
@@ -161,4 +164,5 @@ Future<List<Question>?> getDailyQuestion() async {
         }), imagePath: imagePath)];
     }
   }
+  return null;
 }

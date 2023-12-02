@@ -27,6 +27,8 @@ class Question {
 }
 
 class GameState {
+  static const general = 0, daily = 1;
+  final int gameType;
   List<Question> questions;
   final int totalRound;
   int totalScore = 0;
@@ -35,9 +37,9 @@ class GameState {
   int remainingTime = 0;
   final int roundTime; // in seconds
   final transitionTime = 10; // in seconds
-  bool shuffle = false;
 
   GameState({
+    required this.gameType,
     this.questions = const [],
     required this.totalRound,
     this.roundTime = 60,

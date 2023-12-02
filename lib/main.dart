@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:hku_guesser/game.dart';
+import 'package:hku_guesser/constants.dart';
 import 'package:hku_guesser/game_start.dart';
-import 'package:hku_guesser/game_state.dart';
+import 'package:hku_guesser/ranking.dart';
 import 'package:hku_guesser/question_database.dart';
-import 'constants.dart';
-import 'camera.dart';
+import 'package:hku_guesser/camera.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -31,8 +30,14 @@ class HKUGuesserApp extends StatelessWidget {
 
 class HomePage extends StatelessWidget {
   final logo = SizedBox(
-    width: 274,
-    height: 186,
+    width: 200,
+    height: 200,
+    child: Image.asset('assets/images/icon.png'),
+  );
+
+  final appTitle = SizedBox(
+    width: 250,
+    height: 150,
     child: Text(
       'HKU\nGuesser',
       textAlign: TextAlign.center,
@@ -46,7 +51,7 @@ class HomePage extends StatelessWidget {
     ),
   );
 
-  GestureDetector buildButton(VoidCallback onTap, String btnText) {
+  GestureDetector buildButton(String label, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -61,7 +66,7 @@ class HomePage extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            btnText,
+          label,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: fontColor,
@@ -90,17 +95,18 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.only(left: 24.0, right:24.0),
             children: <Widget>[
               logo,
-              const SizedBox(height: 40),
-              buildButton(() {
+              appTitle,
+              const SizedBox(height: 10),
+              buildButton("Start", () {
                 Navigator.push(
                   context,
                     MaterialPageRoute(
                         builder: (context) =>
                             LoadingPage(gameMode: "Normal"))
                 );
-              }, "Start"),
+              }),
               const SizedBox(height: 20),
-              buildButton(() async {
+              buildButton("Daily Challenge", () async {
                 final day = await QuestionDatabase.instance.doQuery("SELECT * FROM daily");
                 initializeTimeZones();
                 final hk = tz.getLocation(timeZoneName);
@@ -116,7 +122,12 @@ class HomePage extends StatelessWidget {
                               LoadingPage(gameMode: "Daily"))
                   );
                 }
-              }, "Daily Challenge"),
+              }),
+              const SizedBox(height: 20),
+              buildButton("Leaderboard", () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => RankingPage()));
+              }),
             ],
           ),
         ),

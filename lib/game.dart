@@ -1,15 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:flutter/material.dart';
-import 'package:hku_guesser/sync_db.dart';
-import 'package:hku_guesser/transition.dart';
-import 'package:hku_guesser/image.dart';
-import 'package:hku_guesser/question_database.dart';
-import 'package:hku_guesser/game_state.dart';
-import 'constants.dart';
 import 'dart:async';
 import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:hku_guesser/constants.dart';
+import 'package:hku_guesser/transition.dart';
+import 'package:hku_guesser/game_state.dart';
 
 class GamePage extends StatefulWidget {
   final GameState gameState;
@@ -21,25 +18,17 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
   late GameState gameState;
-  var page_index = 0;
+  var _pageIndex = 0;
   final question_index = 15;
   var x = -100.0;
   var y = -100.0;
   var floor = 0;
   late String title;
 
-  var pages = [
+  static var pages = [
     QuestionPage(),
     AnswerPage(),
   ];
-
-  page() {
-    if (page_index == 0) {
-      return pages[0];
-    } else {
-      return pages[1];
-    }
-  }
 
   final viewTransformationController = TransformationController();
 
@@ -55,72 +44,51 @@ class _GamePageState extends State<GamePage> {
     viewTransformationController.value.setEntry(0, 3, -xTranslate);
     viewTransformationController.value.setEntry(1, 3, -yTranslate);
     gameState = widget.gameState;
-    if (widget.gameState.totalRound == 1) {
-      title = "Daily Challenge";
-    } else {
-      title = 'Round ${widget.gameState.roundNum}';
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(gameState.gameType == GameState.daily
+            ? "Daily Challenge"
+            : "Round ${gameState.roundNum}"),
         backgroundColor: mainColor,
       ),
 
       // main game page and a bottom navigation bar
-      body: Column(
+      body: Stack(
         children: <Widget>[
-          Expanded(
-            child: Container(
-              color: Colors.white,
-              child: Center(
-                child: Stack(
-                  children: <Widget>[
-                    page(),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: TimerWidget(
-                        gameState: widget.gameState,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Container(
-            color: Colors.grey,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                //two buttons (question, answer) in the bottom navigation bar
-                IconButton(
-                  color: Colors.white,
-                  icon: const Icon(Icons.question_mark_rounded),
-                  onPressed: () {
-                    setState(() {
-                      page_index = 0;
-                    });
-                  },
-                ),
-                IconButton(
-                  color: Colors.white,
-                  icon: const Icon(Icons.check_circle_rounded),
-                  onPressed: () {
-                    setState(() {
-                      page_index = 1;
-                    });
-                  },
-                ),
-              ],
+          pages[_pageIndex],
+          Positioned(
+            top: 0,
+            right: 0,
+            child: TimerWidget(
+              gameState: widget.gameState,
             ),
           ),
         ],
       ),
+      bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _pageIndex,
+          onTap: (int index) {
+            setState(() {
+              _pageIndex = index;
+            });
+          },
+          iconSize: 36.0,
+          selectedItemColor: highlightColor1,
+          unselectedItemColor: highlightColor2,
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.question_mark_rounded),
+              label: "Question",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.check_circle_rounded),
+              label: "Map",
+            ),
+          ]),
     );
   }
 }
@@ -132,7 +100,7 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   var question_index;
-  Future<void> _asyncWork = Future<void>.value(null);
+  // Future<void> _asyncWork = Future<void>.value(null);
 
   final viewTransformationController = TransformationController();
 
@@ -387,26 +355,20 @@ class _TimerWidgetState extends State<TimerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-        alignment: Alignment.topRight,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Container(
+    return Container(
               margin: const EdgeInsets.only(bottom: 5),
               width: 80,
               height: 50,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(5),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.grey,
-                    spreadRadius: 3,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
-                  ),
-                ],
+          boxShadow: const [
+            BoxShadow(
+                color: Colors.grey,
+                spreadRadius: 1.0,
+                blurRadius: 2.0,
+                offset: Offset(0, 3))
+          ]
               ),
               alignment: Alignment.center,
               child: Text(
@@ -417,8 +379,6 @@ class _TimerWidgetState extends State<TimerWidget> {
                     fontSize: 20,
                     color: Colors.black),
               ),
-            ),
-          ],
-        ));
+    );
   }
 }
