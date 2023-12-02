@@ -170,6 +170,33 @@ class Result extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resultText = gameState.gameType == GameState.general
+        //  Normal game finished text
+        ? <Widget>[
+            Text('Game Finished!',
+                style: TextStyle(
+                    fontFamily: 'LuckiestGuy',
+                    color: highlightColor1,
+                    fontSize: 45)),
+            Text('You scored ${gameState.roundScore} this round!',
+                style: TextStyle(fontSize: 22, height: 2)),
+            MapLocation(q: gameState.questions[gameState.roundNum - 2]),
+            Text(
+                'In ${gameState.totalRound} rounds, you scored ${gameState.totalScore}!',
+                style: TextStyle(fontSize: 22)),
+          ]
+        //  Daily challenge finished text
+        : <Widget>[
+            Text('You have completed the daily challenge!',
+                style: TextStyle(
+                    fontFamily: 'LuckiestGuy',
+                    color: highlightColor1,
+                    fontSize: 30)),
+            Text('You scored ${gameState.totalScore}!',
+                style: TextStyle(fontSize: 22, height: 2)),
+            MapLocation(q: gameState.questions[gameState.roundNum - 2]),
+          ];
+
     return DefaultTextStyle(
         style: const TextStyle(
           color: fontColor,
@@ -183,90 +210,95 @@ class Result extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text('Game Finished!',
-                      style: TextStyle(
-                          fontFamily: 'LuckiestGuy',
-                          color: highlightColor1,
-                          fontSize: 45)),
-                  Text(
-                      'You scored ${gameState.roundScore} this round!',
-                      style: TextStyle(fontSize: 22, height: 2)),
-                  MapLocation(q: gameState.questions[gameState.roundNum - 2]),
-                  Text(
-                      'In ${gameState.totalRound} rounds, you scored ${gameState.totalScore}!',
-                      style: TextStyle(fontSize: 22)),
+                  ...resultText,
                   Container(
                     margin: EdgeInsets.only(top: 50),
-                    child: TextButton(
-                      child: Text(
-                        "Return",
-                        style: TextStyle(color: fontColor, fontSize: 20),
-                      ),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.green,
-                      ),
-                      onPressed: () {
-                        print("Quit");
-                        _exitDialogBuilder(context).then((toRanking) {
-                          if (toRanking == null) {
-                            return;
-                          }
-                          if (toRanking) {
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(
+                              child: Text(
+                                "Return",
+                                style:
+                                    TextStyle(color: fontColor, fontSize: 20),
+                              ),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.all(5.0),
+                                backgroundColor: Colors.green,
+                              ),
+                              onPressed: () {
+                                print("Quit");
+                                Navigator.pop(context);
+                              },
+                            ),
+                            SizedBox(
+                              width: 20.0,
+                            ),
+                            TextButton(
+                                child: Text(
+                                  "Upload my score",
+                                  style:
+                                      TextStyle(color: fontColor, fontSize: 20),
+                                ),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.all(5.0),
+                                  backgroundColor: Colors.green,
+                                ),
+                                onPressed: () {
+                                  print("Upload score");
                             _rankingDialogBuilder(context).then((name) {
-                              if (name == null) {
-                                return;
-                              }
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => RankingPage(
-                                          name: name,
-                                          score: gameState.totalScore)));
-                            });
-                          } else {
-                            Navigator.pop(context);
-                          }
-                        });
-                      },
-                    ),
+                                    if (name == null) {
+                                      return;
+                                    }
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => RankingPage(
+                                                gameType: gameState.gameType,
+                                                name: name,
+                                                score: gameState.totalScore)));
+                                  });
+                                }
+                        ),
+                          ])
                   ),
                 ])));
   }
 
-  Future<bool?> _exitDialogBuilder(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Ranking'),
-          content: const Text(
-            'Do you want to upload your score?\n'
-            'You can see how well you performed against other players!',
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('Yes'),
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // Future<bool?> _exitDialogBuilder(BuildContext context) {
+  //   return showDialog<bool>(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Ranking'),
+  //         content: const Text(
+  //           'Do you want to upload your score?\n'
+  //           'You can see how well you performed against other players!',
+  //         ),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             style: TextButton.styleFrom(
+  //               textStyle: Theme.of(context).textTheme.labelLarge,
+  //             ),
+  //             child: const Text('No'),
+  //             onPressed: () {
+  //               Navigator.pop(context, false);
+  //             },
+  //           ),
+  //           TextButton(
+  //             style: TextButton.styleFrom(
+  //               textStyle: Theme.of(context).textTheme.labelLarge,
+  //             ),
+  //             child: const Text('Yes'),
+  //             onPressed: () {
+  //               Navigator.pop(context, true);
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   Future<String?> _rankingDialogBuilder(BuildContext context) {
     TextEditingController textController = TextEditingController();

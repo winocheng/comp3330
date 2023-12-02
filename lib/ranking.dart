@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hku_guesser/constants.dart';
+import 'package:hku_guesser/sync_score.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class RankingPage extends StatefulWidget {
+  final int gameType;
   final String? name;
   final int? score;
-  const RankingPage({Key? key, this.name, this.score}) : super(key: key);
+  const RankingPage({Key? key, this.gameType = 0, this.name, this.score})
+      : super(key: key);
 
   @override
   State<RankingPage> createState() => _RankingPageState();
@@ -12,31 +16,41 @@ class RankingPage extends StatefulWidget {
 
 class _RankingPageState extends State<RankingPage> {
   static const general = 0, daily = 1;
-  var _rankingType = general;
-  late List<LeaderboardData> _leaderboardScores;
+  late int _rankingType;
+  List<LeaderboardData>? _leaderboardScores;
+
+  List<LeaderboardData> showLeaderBoardScores(List<LeaderboardData>? scores) {
+    if (scores == null) {
+      Fluttertoast.showToast(msg: "Error Retrieving Leaderboard");
+      return [];
+    } else {
+      scores.sort((a, b) => b.score.compareTo(a.score));
+      return scores;
+    }
+  }
 
   void getLeaderboardScores(int type) async {
-    //TODO: link to database
-    final leaderboardScores = [
-      LeaderboardData(name: "Bot1", score: 1000),
-      LeaderboardData(name: "Bot2", score: 10000)
-    ];
-
-    if (widget.name != null && widget.score != null) {
-      leaderboardScores
-          .add(LeaderboardData(name: widget.name!, score: widget.score!));
-    }
-    leaderboardScores.sort((a, b) => b.score.compareTo(a.score));
-    setState(() {
-      _rankingType = type;
-      _leaderboardScores = leaderboardScores;
+    getRanking(type, widget.name).then((value) {
+      setState(() {
+        _rankingType = type;
+        _leaderboardScores = showLeaderBoardScores(value);
+      });
     });
   }
 
   @override
   void initState() {
     super.initState();
-    getLeaderboardScores(_rankingType);
+    _rankingType = widget.gameType;
+    if (widget.name != null && widget.score != null) {
+      uploadRanking(widget.gameType, widget.name!, widget.score!).then((value) {
+        setState(() {
+          _leaderboardScores = showLeaderBoardScores(value);
+        });
+      });
+    } else {
+      getLeaderboardScores(_rankingType);
+    }
   }
 
   @override
@@ -63,44 +77,9 @@ class _RankingPageState extends State<RankingPage> {
               ),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              height: 500,
-              width: 500,
-              child: SingleChildScrollView(
-                child: DefaultTextStyle(
-                  style: const TextStyle(color: Colors.black),
-                  child: DataTable(
-                      columns: const [
-                        DataColumn(
-                          label: Text('Rank'),
-                        ),
-                        DataColumn(
-                          label: Text('Name'),
-                        ),
-                        DataColumn(
-                          label: Text('Score'),
-                        ),
-                      ],
-                      rows: List.generate(_leaderboardScores.length, (index) {
-                        final leaderboard = _leaderboardScores[index];
-                        return DataRow(
-                          cells: [
-                            DataCell(Text('${index + 1}')),
-                            DataCell(Text(
-                              leaderboard.name,
-                              style: TextStyle(
-                                color: leaderboard.name == 'You'
-                                    ? highlightColor2
-                                    : Colors.black,
-                              ),
-                            )),
-                            DataCell(Text(leaderboard.score.toString())),
-                          ],
-                        );
-                      })),
-                ),
-              ),
-            ),
+            _leaderboardScores != null
+                ? Leaderboard(leaderboardScores: _leaderboardScores!)
+                : CircularProgressIndicator(),
           ],
         ),
       ),
@@ -136,19 +115,50 @@ class _RankingPageState extends State<RankingPage> {
   }
 }
 
-class LeaderboardData {
-  final String name;
-  final int score;
+class Leaderboard extends StatelessWidget {
+  final List<LeaderboardData> leaderboardScores;
+  const Leaderboard({Key? key, required this.leaderboardScores})
+      : super(key: key);
 
-  LeaderboardData({
-    required this.name,
-    required this.score,
-  });
-
-  factory LeaderboardData.fromJson(Map json, bool isUser) {
-    return LeaderboardData(
-      name: isUser ? 'You' : json['name'],
-      score: json['score'],
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 500,
+      width: 500,
+      child: SingleChildScrollView(
+        child: DefaultTextStyle(
+          style: const TextStyle(color: Colors.black),
+          child: DataTable(
+              columns: const [
+                DataColumn(
+                  label: Text('Rank'),
+                ),
+                DataColumn(
+                  label: Text('Name'),
+                ),
+                DataColumn(
+                  label: Text('Score'),
+                ),
+              ],
+              rows: List.generate(leaderboardScores.length, (index) {
+                final leaderboard = leaderboardScores[index];
+                return DataRow(
+                  cells: [
+                    DataCell(Text('${index + 1}')),
+                    DataCell(Text(
+                      leaderboard.name,
+                      style: TextStyle(
+                        color: leaderboard.name == 'You'
+                            ? highlightColor2
+                            : Colors.black,
+                      ),
+                    )),
+                    DataCell(Text(leaderboard.score.toString())),
+                  ],
+                );
+              })),
+        ),
+      ),
     );
   }
 }

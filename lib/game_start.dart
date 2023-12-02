@@ -17,9 +17,9 @@ class LoadingPage extends StatelessWidget {
       await updateQuestion();
     }
 
-    final loaded_questions = await QuestionDatabase.instance.getQuestions();
-    loaded_questions.shuffle();
-    return loaded_questions;
+    final loadedQuestions = await QuestionDatabase.instance.getQuestions();
+    loadedQuestions.shuffle();
+    return loadedQuestions;
   }
 
   Future<List<Question>> _loadDaily() async {
@@ -30,14 +30,18 @@ class LoadingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (this.gameMode == "Daily") {
+    if (gameMode == "Daily") {
       return FutureBuilder<List<Question>>(
         future: _loadDaily(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return _buildLoadingWidget();
           } else if (snapshot.hasData) {
-            return GamePage(gameState: GameState(totalRound: 1, questions: snapshot.data!));
+            return GamePage(
+                gameState: GameState(
+                    gameType: GameState.daily,
+                    totalRound: 1,
+                    questions: snapshot.data!));
           } else if (snapshot.hasError) {
             return _buildErrorWidget(snapshot.error.toString());
           } else {
@@ -52,7 +56,11 @@ class LoadingPage extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _buildLoadingWidget();
         } else if (snapshot.hasData) {
-          return GamePage(gameState: GameState(totalRound: 5, questions: snapshot.data!));
+          return GamePage(
+              gameState: GameState(
+                  gameType: GameState.general,
+                  totalRound: 5,
+                  questions: snapshot.data!));
         } else if (snapshot.hasError) {
           return _buildErrorWidget(snapshot.error.toString());
         } else {

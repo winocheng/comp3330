@@ -44,18 +44,15 @@ class _GamePageState extends State<GamePage> {
     viewTransformationController.value.setEntry(0, 3, -xTranslate);
     viewTransformationController.value.setEntry(1, 3, -yTranslate);
     gameState = widget.gameState;
-    if (widget.gameState.totalRound == 1) {
-      title = "Daily Challenge";
-    } else {
-      title = 'Round ${widget.gameState.roundNum}';
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(gameState.gameType == GameState.daily
+            ? "Daily Challenge"
+            : "Round ${gameState.roundNum}"),
         backgroundColor: mainColor,
       ),
 
@@ -103,7 +100,7 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   var question_index;
-  Future<void> _asyncWork = Future<void>.value(null);
+  // Future<void> _asyncWork = Future<void>.value(null);
 
   final viewTransformationController = TransformationController();
 

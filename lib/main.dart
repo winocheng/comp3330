@@ -96,7 +96,7 @@ class HomePage extends StatelessWidget {
             children: <Widget>[
               logo,
               appTitle,
-              const SizedBox(height: 50),
+              const SizedBox(height: 10),
               buildButton("Start", () {
                 Navigator.push(
                   context,
