@@ -1,12 +1,12 @@
 import 'dart:convert';
+import 'dart:async';
 
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hku_guesser/constants.dart';
 import 'package:hku_guesser/game_state.dart';
 import 'package:hku_guesser/image.dart';
 import 'package:hku_guesser/question_database.dart';
-import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:fluttertoast/fluttertoast.dart';
 
 Future<bool> checkServerConnection(String serverUrl) async {
   try {
@@ -23,11 +23,9 @@ Future<String?> downloadImage(String qid) async {
     final response = await http.get(Uri.parse("$serverIP/image/$qid"));
     return base64Encode(response.bodyBytes);
   } catch (e) {
-    print("caught error while retrieving data: $e");
+    Fluttertoast.showToast(msg: "Caught error while retrieving data: $e");
     return null;
   }
-
-
 }
 
 Future<void> initLocalData(int n) async {
@@ -77,7 +75,7 @@ Future<void> initLocalData(int n) async {
   await saveImageToStorageFromAssets('assets/images/image5.jpg', n));
 }
 
-Future<void> initailize_question({var n = 1}) async {
+Future<void> initQuestion({int n = 1}) async {
   bool isConnected = await checkServerConnection(serverIP);
   if (isConnected) {
     try {
@@ -86,28 +84,26 @@ Future<void> initailize_question({var n = 1}) async {
         final jsonData = json.decode(response.body);
         
         for (var question in jsonData) {
-          final image_byte = await downloadImage(question["id"]);
-          assert(image_byte != null, 'failed to get image');
+          final imageByte = await downloadImage(question["id"]);
           await QuestionDatabase.instance.insertQuestion(question["id"],
-          jsonEncode({
-            "x-coordinate": question["x"],
-            "y-coordinate": question["y"],
-            "floor": question["floor"]
-          }),
-          await saveImageToStorageFromBytes(image_byte!, question["id"]));
+              jsonEncode({
+                "x-coordinate": question["x"],
+                "y-coordinate": question["y"],
+                "floor": question["floor"]
+              }),
+              await saveImageToStorageFromBytes(imageByte!, question["id"]));
         }
         Fluttertoast.showToast(msg: "Successfully Retrieve Questions");
       }
     } 
     catch (e) {
-      print(e);
       Fluttertoast.showToast(msg: "Error Connecting to Server");
       await initLocalData(n);
     }
   } else {
     await initLocalData(n);
   }
-  }
+}
 
 Future<void> updateQuestion() async {
   List<Map> result = await QuestionDatabase.instance.doQuery("SELECT MAX(id) AS max_id FROM questions");
@@ -120,48 +116,54 @@ Future<void> updateQuestion() async {
         final jsonData = json.decode(response.body);
         
         for (var question in jsonData) {
-          final image_byte = await downloadImage(question["id"]);
-          assert(image_byte != null, 'failed to get image');
+          final imageByte = await downloadImage(question["id"]);
+          assert(imageByte != null, 'failed to get image');
           await QuestionDatabase.instance.insertQuestion(question["id"],
-          jsonEncode({
-            "x-coordinate": question["x"],
-            "y-coordinate": question["y"],
-            "floor": question["floor"]
-          }),
-          await saveImageToStorageFromBytes(image_byte!, question["id"]));
+              jsonEncode({
+                "x-coordinate": question["x"],
+                "y-coordinate": question["y"],
+                "floor": question["floor"]
+              }),
+              await saveImageToStorageFromBytes(imageByte!, question["id"]));
         }
       }
     }
     catch (e) {
-      print(e);
+      Fluttertoast.showToast(msg: "Error Connecting to Server");
     }
-
   }
-
 }
 
 Future<List<Question>?> getDailyQuestion() async {
   bool isConnected = await checkServerConnection(serverIP);
 
   if (isConnected) {
-    final response = await http.get(Uri.parse("$serverIP/daily"));
-    if (response.statusCode == 200) {
-      final question = json.decode(response.body);
-      QuestionDatabase.instance.doQuery('''
-        REPLACE INTO daily (id, date)
-        VALUES ('today', '${question["date"]}')
-      ''');
+    try {
+      final response = await http.get(Uri.parse("$serverIP/daily"));
+      if (response.statusCode == 200) {
+        final question = json.decode(response.body);
+        final imageByte = await downloadImage(question["id"]);
+        final imagePath =
+            await saveImageToStorageFromBytes(imageByte!, question["id"]);
 
-      final image_byte = await downloadImage(question["id"]);
-      assert(image_byte != null, 'failed to get image');
+        QuestionDatabase.instance.doQuery('''
+          REPLACE INTO daily (id, date)
+          VALUES ('today', '${question["date"]}')
+        ''');
 
-      final imagePath = await saveImageToStorageFromBytes(image_byte!, question["id"]);
-
-      return [Question(id: question["id"], jsonText: jsonEncode({
-          "x-coordinate": question["x"],
-          "y-coordinate": question["y"],
-          "floor": question["floor"]
-        }), imagePath: imagePath)];
+        return [
+          Question(
+              id: question["id"],
+              jsonText: jsonEncode({
+                "x-coordinate": question["x"],
+                "y-coordinate": question["y"],
+                "floor": question["floor"]
+              }),
+              imagePath: imagePath)
+        ];
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Error Connecting to Server");
     }
   }
   return null;
