@@ -10,7 +10,7 @@ import 'package:hku_guesser/game_state.dart';
 
 class GamePage extends StatefulWidget {
   final GameState gameState;
-  const GamePage({Key? key, required this.gameState}) : super(key: key);
+  const GamePage({super.key, required this.gameState});
 
   @override
   State<StatefulWidget> createState() => _GamePageState();
