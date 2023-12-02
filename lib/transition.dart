@@ -187,11 +187,12 @@ class Result extends StatelessWidget {
           ]
         //  Daily challenge finished text
         : <Widget>[
-            Text('You have completed the daily challenge!',
+            Text('You have completed\nthe daily challenge!',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                     fontFamily: 'LuckiestGuy',
                     color: highlightColor1,
-                    fontSize: 30)),
+                    fontSize: 32)),
             Text('You scored ${gameState.totalScore}!',
                 style: TextStyle(fontSize: 22, height: 2)),
             MapLocation(q: gameState.questions[gameState.roundNum - 2]),

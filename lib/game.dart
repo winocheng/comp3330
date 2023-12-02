@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:hku_guesser/constants.dart';
@@ -57,16 +56,33 @@ class _GamePageState extends State<GamePage> {
       ),
 
       // main game page and a bottom navigation bar
-      body: Stack(
+      body: Column(
         children: <Widget>[
-          pages[_pageIndex],
-          Positioned(
-            top: 0,
-            right: 0,
-            child: TimerWidget(
-              gameState: widget.gameState,
-            ),
-          ),
+          Container(
+              padding: EdgeInsets.only(left: 10.0),
+              color: highlightColor1,
+              child: Row(children: [
+                Text(
+                  '${gameState.roundNum}/${gameState.totalRound}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Expanded(
+                    child: Text(
+                  'Score: ${gameState.totalScore}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                )),
+                TimerWidget(gameState: widget.gameState),
+              ])),
+          Expanded(child: pages[_pageIndex]),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -123,14 +139,12 @@ class _QuestionPageState extends State<QuestionPage> {
     var imagefile = File(state!.gameState.questions[state.gameState.roundNum - 1].imagePath);
     var image = Image.file(imagefile,height: 900,);
     question_index = state.question_index;
-    return Scaffold(
-      body: Center(
+    return Center(
         child: InteractiveViewer(
-          transformationController: viewTransformationController,
-          minScale: 0.01,
-          constrained: false,
-          child: image,
-        ),
+      transformationController: viewTransformationController,
+      minScale: 0.01,
+      constrained: false,
+      child: image,
       )
     );
   }
@@ -305,7 +319,6 @@ class _AnswerPageState extends State<AnswerPage> {
 
 class TimerWidget extends StatefulWidget {
   final GameState gameState;
-
   const TimerWidget({Key? key, required this.gameState}) : super(key: key);
 
   @override
@@ -356,29 +369,27 @@ class _TimerWidgetState extends State<TimerWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-              margin: const EdgeInsets.only(bottom: 5),
-              width: 80,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(5),
-          boxShadow: const [
-            BoxShadow(
+        padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(5),
+            boxShadow: const [
+              BoxShadow(
                 color: Colors.grey,
-                spreadRadius: 1.0,
-                blurRadius: 2.0,
-                offset: Offset(0, 3))
-          ]
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                "$_start",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.black),
-              ),
-    );
+                spreadRadius: 2.0,
+                blurRadius: 3.0,
+                offset: Offset(0, 3),
+              )
+            ]),
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Icon(Icons.alarm),
+          SizedBox(width: 5.0),
+          Text(
+            "$_start",
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black),
+          ),
+        ]));
   }
 }
