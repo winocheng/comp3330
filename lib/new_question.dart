@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hku_guesser/image.dart';
+import 'package:hku_guesser/sync_db.dart';
 import 'package:image_picker/image_picker.dart';
 import 'constants.dart';
 import 'package:http/http.dart' as http;
@@ -40,6 +41,7 @@ class _AnswerPageState extends State<NewAnswerPage> {
   var x = -100.0;
   var y = -100.0;
   var floor = 0;
+  bool _isButtonDisabled = false;
 
   final viewTransformationController = TransformationController();
 
@@ -156,59 +158,73 @@ class _AnswerPageState extends State<NewAnswerPage> {
                         ),
                       ],
                     ),
-                    child: GestureDetector(
-                      onTap: () async {
-                        widget.image.readAsBytes().then((value) async {
-                          String b64 = base64.encode(value);
-                          final Map<String, dynamic> data = {
-                            'image': b64,
-                            'x': x,
-                            'y': y,
-                            'floor': floor,
-                          };
+                    child: AbsorbPointer(
+                      absorbing: _isButtonDisabled,
+                      child: GestureDetector(
+                        onTap: () async {
+                          setState(() {
+                            _isButtonDisabled = true;
+                          });
+                          widget.image.readAsBytes().then((value) async {
+                            String b64 = base64.encode(value);
+                            final Map<String, dynamic> data = {
+                              'image': b64,
+                              'x': x,
+                              'y': y,
+                              'floor': floor,
+                            };
 
-                          try {
-                            final response = await http.post(
-                              Uri.parse("$serverIP/create_question"),
-                              headers: {'Content-Type': 'application/json'},
-                              body: jsonEncode(data)
-                            );
+                            try {
+                              final check = await QuestionDatabase.instance.getQuestions();
 
-                            if (response.statusCode == 200) {
-                              final String qid = json.decode(response.body)["id"];
-                              await QuestionDatabase.instance.insertQuestion(qid,
-                                jsonEncode({
-                                  "x-coordinate": x,
-                                  "y-coordinate": y,
-                                  "floor": floor
-                                }),
-                                await saveImageToStorageFromBytes(b64, qid)
+                              if (check.isEmpty) {
+                                await initailize_question();
+                              } else {
+                                await updateQuestion();
+                              }
+                              
+                              final response = await http.post(
+                                Uri.parse("$serverIP/create_question"),
+                                headers: {'Content-Type': 'application/json'},
+                                body: jsonEncode(data)
                               );
+
+                              if (response.statusCode == 200) {
+                                final String qid = json.decode(response.body)["id"];
+                                await QuestionDatabase.instance.insertQuestion(qid,
+                                  jsonEncode({
+                                    "x-coordinate": x,
+                                    "y-coordinate": y,
+                                    "floor": floor
+                                  }),
+                                  await saveImageToStorageFromBytes(b64, qid)
+                                );
+                                Fluttertoast.showToast(
+                                  msg: "Successfully Created New Question"
+                                );
+                              } else {
+                                Fluttertoast.showToast(
+                                  msg: "Error Creating New Question"
+                                );
+                              }
+                            } on SocketException {
                               Fluttertoast.showToast(
-                                msg: "Successfully Created New Question"
+                                msg: "Error Connecting to Server"
                               );
-                            } else {
-                              Fluttertoast.showToast(
-                                msg: "Error Creating New Question"
-                              );
+                            } catch (e) {
+                              print(e);
                             }
-                          } on SocketException {
-                            Fluttertoast.showToast(
-                              msg: "Error Connecting to Server"
-                            );
-                          } catch (e) {
-                            print(e);
-                          }
-                        })
-                        .then((value) {
-                          Navigator.pop(context);
-                        });
-                      },
-                      child: const Center(
-                        child: Text(
-                          'Submit',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          })
+                          .then((value) {
+                            Navigator.pop(context);
+                          });
+                        },
+                        child: const Center(
+                          child: Text(
+                            'Submit',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     ),

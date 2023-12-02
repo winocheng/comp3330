@@ -112,6 +112,49 @@ def get_daily():
         
     return jsonify(return_data)
 
+@app.route('/score/general', methods=['GET'])
+def get_general_ranking():
+    if 'ranking' not in client.db.list_collection_names():
+        return jsonify([])
+    document = client.db.ranking.find_one({"date": "general"})
+
+    if document:
+        return jsonify(document["rankings"])
+    
+    return jsonify([])
+
+@app.route('/score/daily', methods=['GET'])
+def get_daily_ranking():
+    if 'ranking' not in client.db.list_collection_names():
+        return jsonify([])
+    current_time = datetime.now(timezone('Asia/Hong_Kong'))
+    document = client.db.ranking.find_one({"date": current_time.strftime("%d/%m/%y")})
+
+    if document:
+        return jsonify(document["rankings"])
+    
+    return jsonify([])
+
+@app.route('/score', methods=['POST'])
+def post_score():
+    collection = client.db.ranking
+    current_time = datetime.now(timezone('Asia/Hong_Kong'))
+
+    data = request.get_json()
+
+    date = "general" if data["score_type"] == 0 else current_time.strftime("%d/%m/%y")
+    document = collection.find_one({"date": date})
+    
+    if document:
+        document["rankings"].append({ "name": data["name"], "score": data["score"] })
+        collection.replace_one({"_id": document["_id"]}, document)
+    else:
+        collection.insert_one({ "date": date, "rankings": [{ "name": data["name"], "score": data["score"] }] })
+
+
+    return jsonify({"message": "successful"})
+
+
 @app.route('/')
 def root():
     return jsonify({
@@ -122,6 +165,7 @@ def init_db(client):
     collection = client.db.questions
     collection.delete_many({})
     client.db.daily.drop()
+    client.db.ranking.drop()
     
     '''
     with open("27_hku_hong-kong-university_colonial-heritage_zolima-citymag.jpg", "rb") as file:
