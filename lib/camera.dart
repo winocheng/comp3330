@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'constants.dart';
-import 'new_question.dart';
+import 'package:hku_guesser/constants.dart';
+import 'package:hku_guesser/new_question.dart';
 
 class CameraButton extends StatefulWidget {
   const CameraButton({super.key});
 
   @override
-  _CameraButtonState createState() => _CameraButtonState();
+  State<CameraButton> createState() => _CameraButtonState();
 }
 
 class _CameraButtonState extends State<CameraButton> {
@@ -29,11 +29,14 @@ class _CameraButtonState extends State<CameraButton> {
     return FloatingActionButton.large(
       onPressed: () {_takePhoto(context);},
       shape: RoundedRectangleBorder(
-          side: BorderSide(width: 3, color: mainColor),
+          side: const BorderSide(width: 3, color: mainColor),
           borderRadius: BorderRadius.circular(100)
         ),
         backgroundColor: backgroundColor,
-        child: Icon(Icons.add_a_photo_rounded, color: mainColor,),
+      child: const Icon(
+        Icons.add_a_photo_rounded,
+        color: mainColor,
+      ),
     );
   }
 }

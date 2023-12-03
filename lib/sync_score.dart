@@ -43,14 +43,13 @@ Future<List<LeaderboardData>?> getRanking(int scoreType, String? name) async {
           await http.get(Uri.parse("$serverIP/score/$scoreTypeStr"));
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
-        print(jsonData);
         final leaderboardScores = jsonData
             .map((item) => LeaderboardData.fromJson(item, item['name'] == name))
             .toList();
         return leaderboardScores;
       }
     } catch (e) {
-      print(e);
+      // print(e);
     }
   }
   Fluttertoast.showToast(msg: "Error Connecting to Server");
@@ -80,7 +79,7 @@ Future<List<LeaderboardData>?> uploadRanking(
     } on SocketException {
       Fluttertoast.showToast(msg: "Error Connecting to Server");
     } catch (e) {
-      print(e);
+      // print(e);
     }
   }
 

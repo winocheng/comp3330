@@ -78,9 +78,9 @@ class LoadingPage extends StatelessWidget {
   }
 
   Widget _buildLoadingWidget() {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator()
       )
     );
     
@@ -90,7 +90,7 @@ class LoadingPage extends StatelessWidget {
   Widget _buildErrorWidget(String error) {
     return Scaffold(
       body: Center(
-        child: Text('Error: $error'),
+        child: Text('Error: $error')
       )
     );
   }

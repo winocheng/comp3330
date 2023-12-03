@@ -40,7 +40,7 @@ class HomePage extends StatelessWidget {
     child: Image.asset('assets/images/icon.png'),
   );
 
-  final appTitle = SizedBox(
+  final appTitle = const SizedBox(
     width: 250,
     height: 150,
     child: Text(
@@ -73,7 +73,7 @@ class HomePage extends StatelessWidget {
           child: Text(
           label,
             textAlign: TextAlign.center,
-            style: TextStyle(
+          style: const TextStyle(
               color: fontColor,
               fontSize: 24,
               fontFamily: 'Inter',
@@ -85,7 +85,6 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
 
   HomePage({super.key});
 
@@ -107,7 +106,7 @@ class HomePage extends StatelessWidget {
                   context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            LoadingPage(gameMode: "Normal"))
+                            const LoadingPage(gameMode: "Normal"))
                 );
               }),
               const SizedBox(height: 20),
@@ -116,22 +115,23 @@ class HomePage extends StatelessWidget {
                 initializeTimeZones();
                 final hk = tz.getLocation(timeZoneName);
                 final now = tz.TZDateTime.now(hk);
-                print(DateFormat('dd/MM/yy').format(now));
                 if (day.isNotEmpty && day[0]["date"] == DateFormat('dd/MM/yy').format(now)) {
                   Fluttertoast.showToast(msg: "You have already attempted today's challenge!");
                 } else {
+                  // ignore: use_build_context_synchronously
                   Navigator.push(
                     context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              LoadingPage(gameMode: "Daily"))
+                              const LoadingPage(gameMode: "Daily"))
                   );
                 }
               }),
               const SizedBox(height: 20),
               buildButton("Leaderboard", () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => RankingPage()));
+                    MaterialPageRoute(
+                        builder: (context) => const RankingPage()));
               }),
             ],
           ),

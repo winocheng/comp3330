@@ -57,7 +57,7 @@ class _RankingPageState extends State<RankingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ranking'),
+        title: const Text('Ranking'),
         backgroundColor: mainColor,
       ),
       body: Center(
@@ -70,7 +70,7 @@ class _RankingPageState extends State<RankingPage> {
                 daily => "Today's leaderboard",
                 _ => "Leaderboard"
               },
-              style: TextStyle(
+              style: const TextStyle(
                 color: highlightColor1,
                 fontWeight: FontWeight.w900,
                 fontSize: 30,
@@ -79,7 +79,7 @@ class _RankingPageState extends State<RankingPage> {
             const SizedBox(height: 20),
             _leaderboardScores != null
                 ? Leaderboard(leaderboardScores: _leaderboardScores!)
-                : CircularProgressIndicator(),
+                : const CircularProgressIndicator(),
           ],
         ),
       ),
@@ -90,13 +90,13 @@ class _RankingPageState extends State<RankingPage> {
           selectedItemColor: highlightColor1,
           unselectedItemColor: highlightColor2,
           items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.bar_chart_sharp),
               label: "General",
             ),
             BottomNavigationBarItem(
-              icon: Stack(alignment: Alignment(0, 0.5), children: [
-                Icon(Icons.calendar_today_rounded),
+              icon: Stack(alignment: const Alignment(0, 0.5), children: [
+                const Icon(Icons.calendar_today_rounded),
                 Text(
                   DateTime.now().day.toString(),
                   style: TextStyle(

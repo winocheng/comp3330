@@ -35,6 +35,7 @@ class _TransitionPageState extends State<TransitionPage> {
   }
 }
 
+
 class Transition extends StatelessWidget {
   final GameState gameState;
   const Transition({Key? key, required this.gameState}) : super(key: key);
@@ -67,17 +68,17 @@ class Transition extends StatelessWidget {
                   Text(
                     'You score ${gameState.roundScore} this round!\n'
                     'Total score: ${gameState.totalScore}',
-                    style: TextStyle(fontSize: 25),
+                    style: const TextStyle(fontSize: 25),
                     textAlign: TextAlign.center,
                   ),
                   MapLocation(q: gameState.questions[gameState.roundNum - 2]),
                   Text(
                     'Round ${gameState.roundNum} starts in:',
-                    style: TextStyle(fontSize: 25),
+                    style: const TextStyle(fontSize: 25),
                     textAlign: TextAlign.center,
                   ),
                   Container(
-                    margin: EdgeInsets.symmetric(vertical: 15),
+                    margin: const EdgeInsets.symmetric(vertical: 15),
                     child: SizedBox(
                       width: 177,
                       height: 177,
@@ -88,17 +89,16 @@ class Transition extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    child: Text(
-                      "Next Question",
-                      style: TextStyle(color: fontColor, fontSize: 20),
-                    ),
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
                     onPressed: () {
-                      print("Next round");
                       nextRound(context);
                     },
+                    child: const Text(
+                      "Next Question",
+                      style: TextStyle(color: fontColor, fontSize: 20),
+                    ),
                   ),
                 ],
               ),
@@ -125,7 +125,7 @@ class _CountdownState extends State<Countdown> {
     super.initState();
     _myDuration = Duration(seconds: widget.duration);
     countdownTimer =
-        Timer.periodic(Duration(seconds: 1), (_) => setCountDown());
+        Timer.periodic(const Duration(seconds: 1), (_) => setCountDown());
   }
 
   @override
@@ -150,12 +150,12 @@ class _CountdownState extends State<Countdown> {
   Widget build(BuildContext context) {
     final seconds = _myDuration.inSeconds.toString();
     return Stack(
-      alignment: Alignment(0, -0.3),
+      alignment: const Alignment(0, -0.3),
       children: [
         Image.asset('assets/images/location.png'),
         Text(
             seconds,
-            style: TextStyle(
+          style: const TextStyle(
               fontSize: 60,
               fontWeight: FontWeight.w700,
             ),
@@ -176,28 +176,28 @@ class Result extends StatelessWidget {
     final resultText = gameState.gameType == GameState.general
         //  Normal game finished text
         ? <Widget>[
-            Text('Game Finished!',
+            const Text('Game Finished!',
                 style: TextStyle(
                     fontFamily: 'LuckiestGuy',
                     color: highlightColor1,
                     fontSize: 45)),
             Text('You scored ${gameState.roundScore} this round!',
-                style: TextStyle(fontSize: 22, height: 2)),
+                style: const TextStyle(fontSize: 22, height: 2)),
             MapLocation(q: gameState.questions[gameState.roundNum - 2]),
             Text(
                 'In ${gameState.totalRound} rounds, you scored ${gameState.totalScore}!',
-                style: TextStyle(fontSize: 22)),
+                style: const TextStyle(fontSize: 22)),
           ]
         //  Daily challenge finished text
         : <Widget>[
-            Text('You have completed\nthe daily challenge!',
+            const Text('You have completed\nthe daily challenge!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontFamily: 'LuckiestGuy',
                     color: highlightColor1,
                     fontSize: 32)),
             Text('You scored ${gameState.totalScore}!',
-                style: TextStyle(fontSize: 22, height: 2)),
+                style: const TextStyle(fontSize: 22, height: 2)),
             MapLocation(q: gameState.questions[gameState.roundNum - 2]),
           ];
 
@@ -216,41 +216,32 @@ class Result extends StatelessWidget {
                 children: [
                   ...resultText,
                   Container(
-                    margin: EdgeInsets.only(top: 50),
+                      margin: const EdgeInsets.only(top: 50),
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             TextButton(
-                              child: Text(
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.all(5.0),
+                                backgroundColor: Colors.green,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text(
                                 "Return",
                                 style:
                                     TextStyle(color: fontColor, fontSize: 20),
                               ),
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.all(5.0),
-                                backgroundColor: Colors.green,
-                              ),
-                              onPressed: () {
-                                print("Quit");
-                                Navigator.pop(context);
-                              },
                             ),
-                            SizedBox(
-                              width: 20.0,
-                            ),
+                            const SizedBox(width: 20.0),
                             TextButton(
-                                child: Text(
-                                  "Upload my score",
-                                  style:
-                                      TextStyle(color: fontColor, fontSize: 20),
-                                ),
                                 style: TextButton.styleFrom(
-                                  padding: EdgeInsets.all(5.0),
+                                  padding: const EdgeInsets.all(5.0),
                                   backgroundColor: Colors.green,
                                 ),
                                 onPressed: () {
-                                  print("Upload score");
-                            _rankingDialogBuilder(context).then((name) {
+                                  _rankingDialogBuilder(context).then((name) {
                                     if (name == null) {
                                       return;
                                     }
@@ -262,8 +253,12 @@ class Result extends StatelessWidget {
                                                 name: name,
                                                 score: gameState.totalScore)));
                                   });
-                                }
-                        ),
+                                },
+                                child: const Text(
+                                  "Upload my score",
+                                  style:
+                                      TextStyle(color: fontColor, fontSize: 20),
+                                )),
                           ])
                   ),
                 ])));
@@ -299,8 +294,8 @@ class Result extends StatelessWidget {
       },
     );
   }
-
 }
+
 
 class MapLocation extends StatelessWidget {
   final Question q;
@@ -341,7 +336,7 @@ class MapLocation extends StatelessWidget {
     final x = jsonData['x-coordinate'];
     final y = jsonData['y-coordinate'];
     return Container(
-        margin: EdgeInsets.symmetric(vertical: 20),
+        margin: const EdgeInsets.symmetric(vertical: 20),
         child: SizedBox(
             key: _boxKey,
             width: 250,
@@ -350,7 +345,7 @@ class MapLocation extends StatelessWidget {
                 future: _cropImage(x, y),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
+                    return const CircularProgressIndicator();
                   } else if (snapshot.hasData) {
                     return CustomPaint(
                         foregroundPainter: paintCircle(x, y),
@@ -359,7 +354,7 @@ class MapLocation extends StatelessWidget {
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else {
-                    return CircularProgressIndicator();
+                    return const CircularProgressIndicator();
                   }
                 })));       
   }

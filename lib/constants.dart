@@ -20,8 +20,8 @@ class NoOverscroll extends ScrollBehavior {
 }
 
 class CirclePainter extends CustomPainter {
-  var x;
-  var y;
+  final double x;
+  final double y;
 
   CirclePainter(this.x, this.y);
 
