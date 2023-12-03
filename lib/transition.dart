@@ -334,36 +334,15 @@ class Result extends StatelessWidget {
 
 }
 
-class MapLocation extends StatefulWidget {
+class MapLocation extends StatelessWidget {
   final Question q;
-  const MapLocation({Key? key, required this.q}) : super(key: key);
+  MapLocation({Key? key, required this.q}) : super(key: key);
 
-  @override
-  State<MapLocation> createState() => _MapLocationState();
-}
-
-class _MapLocationState extends State<MapLocation> {
   final width = 500; // Width of the crop region
   final height = 500; // Height of the crop region
-  late double x, y;
   final GlobalKey _boxKey = GlobalKey();
 
-  img.Image? croppedImage;
-  CirclePainter? circleDot;
-
-  @override
-  void initState() {
-    super.initState();
-    var jsonData = jsonDecode(widget.q.jsonText);
-    x = jsonData['x-coordinate'];
-    y = jsonData['y-coordinate'];
-    cropImage();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      paintCircle();
-    });
-  }
-
-  Future<void> cropImage() async {
+  Future<img.Image> _cropImage(double x, double y) async {
     int toPosInt(double n) => n < 0 ? 0 : n.toInt();
 
     List<int> imageBytes = await rootBundle
@@ -374,12 +353,10 @@ class _MapLocationState extends State<MapLocation> {
 
     int dx = toPosInt(x - width / 2);
     int dy = toPosInt(y - height / 2);
-    croppedImage = img.copyCrop(originalImage!, dx, dy, width, height);
-
-    setState(() {});
+    return img.copyCrop(originalImage!, dx, dy, width, height);
   }
 
-  void paintCircle() {
+  CirclePainter paintCircle(double x, double y) {
     final RenderBox renderBox =
         _boxKey.currentContext!.findRenderObject() as RenderBox;
     double toOffset(double n, double dn) => n - dn < 0 ? n : dn;
@@ -387,24 +364,35 @@ class _MapLocationState extends State<MapLocation> {
     double dx = toOffset(x, width / 2) * renderBox.size.width / width;
     double dy = toOffset(y, height / 2) * renderBox.size.height / height;
 
-    setState(() {
-      circleDot = CirclePainter(dx, dy);
-    });
+    return CirclePainter(dx, dy);
   }
 
   @override
   Widget build(BuildContext context) {
+    final jsonData = jsonDecode(q.jsonText);
+    final x = jsonData['x-coordinate'];
+    final y = jsonData['y-coordinate'];
     return Container(
         margin: EdgeInsets.symmetric(vertical: 20),
         child: SizedBox(
             key: _boxKey,
             width: 250,
             height: 250,
-            child: CustomPaint(
-                foregroundPainter: circleDot,
-                child: croppedImage != null
-                    ? Image.memory(
-                        Uint8List.fromList(img.encodeJpg(croppedImage!)))
-                    : CircularProgressIndicator())));
+            child: FutureBuilder<img.Image>(
+                future: _cropImage(x, y),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasData) {
+                    return CustomPaint(
+                        foregroundPainter: paintCircle(x, y),
+                        child: Image.memory(
+                            Uint8List.fromList(img.encodeJpg(snapshot.data!))));
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                })));       
   }
 }
