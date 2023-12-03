@@ -178,7 +178,7 @@ class _AnswerPageState extends State<NewAnswerPage> {
                               final check = await QuestionDatabase.instance.getQuestions();
 
                               if (check.isEmpty) {
-                                await initailize_question();
+                                await initQuestion();
                               } else {
                                 await updateQuestion();
                               }
