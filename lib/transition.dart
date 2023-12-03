@@ -40,10 +40,11 @@ class Transition extends StatelessWidget {
   const Transition({Key? key, required this.gameState}) : super(key: key);
 
   void nextRound(BuildContext context) {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (context) => GamePage(gameState: gameState)));
+            builder: (context) => GamePage(gameState: gameState)),
+        ModalRoute.withName('/'));
   }
 
   @override
@@ -54,52 +55,54 @@ class Transition extends StatelessWidget {
           fontFamily: 'Inter',
           height: 0,
         ),
-        child: Container(
-          color: mainColor,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'You score ${gameState.roundScore} this round!\n'
-                'Total score: ${gameState.totalScore}',
-                style: TextStyle(fontSize: 25),
-                textAlign: TextAlign.center,
-              ),
-              MapLocation(q: gameState.questions[gameState.roundNum - 2]),
-              Text(
-                'Round ${gameState.roundNum} starts in:',
-                style: TextStyle(fontSize: 25),
-                textAlign: TextAlign.center,
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 15),
-                child: SizedBox(
-                  width: 177,
-                  height: 177,
-                  child: Countdown(
-                    duration: gameState.transitionTime,
-                    nextRound: nextRound,
+        child: WillPopScope(
+            onWillPop: ExitDialogBuilder(context).build,
+            child: Container(
+              color: mainColor,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'You score ${gameState.roundScore} this round!\n'
+                    'Total score: ${gameState.totalScore}',
+                    style: TextStyle(fontSize: 25),
+                    textAlign: TextAlign.center,
                   ),
-                ),
+                  MapLocation(q: gameState.questions[gameState.roundNum - 2]),
+                  Text(
+                    'Round ${gameState.roundNum} starts in:',
+                    style: TextStyle(fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 15),
+                    child: SizedBox(
+                      width: 177,
+                      height: 177,
+                      child: Countdown(
+                        duration: gameState.transitionTime,
+                        nextRound: nextRound,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    child: Text(
+                      "Next Question",
+                      style: TextStyle(color: fontColor, fontSize: 20),
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    onPressed: () {
+                      print("Next round");
+                      nextRound(context);
+                    },
+                  ),
+                ],
               ),
-              TextButton(
-                child: Text(
-                  "Next Question",
-                  style: TextStyle(color: fontColor, fontSize: 20),
-                ),
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.green,
-                ),
-                onPressed: () {
-                  print("Next round");
-                  nextRound(context);
-                },
-              ),
-            ],
-          ),
-        ));
+            )));
   }
 }
 
@@ -265,41 +268,6 @@ class Result extends StatelessWidget {
                   ),
                 ])));
   }
-
-  // Future<bool?> _exitDialogBuilder(BuildContext context) {
-  //   return showDialog<bool>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text('Ranking'),
-  //         content: const Text(
-  //           'Do you want to upload your score?\n'
-  //           'You can see how well you performed against other players!',
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             style: TextButton.styleFrom(
-  //               textStyle: Theme.of(context).textTheme.labelLarge,
-  //             ),
-  //             child: const Text('No'),
-  //             onPressed: () {
-  //               Navigator.pop(context, false);
-  //             },
-  //           ),
-  //           TextButton(
-  //             style: TextButton.styleFrom(
-  //               textStyle: Theme.of(context).textTheme.labelLarge,
-  //             ),
-  //             child: const Text('Yes'),
-  //             onPressed: () {
-  //               Navigator.pop(context, true);
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   Future<String?> _rankingDialogBuilder(BuildContext context) {
     TextEditingController textController = TextEditingController();

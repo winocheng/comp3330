@@ -47,65 +47,67 @@ class _GamePageState extends State<GamePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(gameState.gameType == GameState.daily
-            ? "Daily Challenge"
-            : "Round ${gameState.roundNum}"),
-        backgroundColor: mainColor,
-      ),
+    return WillPopScope(
+        onWillPop: ExitDialogBuilder(context).build,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(gameState.gameType == GameState.daily
+                ? "Daily Challenge"
+                : "Round ${gameState.roundNum}"),
+            backgroundColor: mainColor,
+          ),
 
-      // main game page and a bottom navigation bar
-      body: Column(
-        children: <Widget>[
-          Container(
-              padding: EdgeInsets.only(left: 10.0),
-              color: highlightColor1,
-              child: Row(children: [
-                Text(
-                  '${gameState.roundNum}/${gameState.totalRound}',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
+          // main game page and a bottom navigation bar
+          body: Column(
+            children: <Widget>[
+              Container(
+                  padding: EdgeInsets.only(left: 10.0),
+                  color: highlightColor1,
+                  child: Row(children: [
+                    Text(
+                      '${gameState.roundNum}/${gameState.totalRound}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Expanded(
+                        child: Text(
+                      'Score: ${gameState.totalScore}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    )),
+                    TimerWidget(gameState: widget.gameState),
+                  ])),
+              Expanded(child: pages[_pageIndex]),
+            ],
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+              currentIndex: _pageIndex,
+              onTap: (int index) {
+                setState(() {
+                  _pageIndex = index;
+                });
+              },
+              iconSize: 36.0,
+              selectedItemColor: highlightColor1,
+              unselectedItemColor: highlightColor2,
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.question_mark_rounded),
+                  label: "Question",
                 ),
-                Expanded(
-                    child: Text(
-                  'Score: ${gameState.totalScore}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                )),
-                TimerWidget(gameState: widget.gameState),
-              ])),
-          Expanded(child: pages[_pageIndex]),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _pageIndex,
-          onTap: (int index) {
-            setState(() {
-              _pageIndex = index;
-            });
-          },
-          iconSize: 36.0,
-          selectedItemColor: highlightColor1,
-          unselectedItemColor: highlightColor2,
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.question_mark_rounded),
-              label: "Question",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.check_circle_rounded),
-              label: "Map",
-            ),
-          ]),
-    );
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.check_circle_rounded),
+                  label: "Map",
+                ),
+              ]),
+        ));
   }
 }
 
@@ -344,12 +346,13 @@ class _TimerWidgetState extends State<TimerWidget> {
         if (_start == 0) {
           _timer.cancel();
           widget.gameState.roundScore = 0;
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
                   builder: (context) => TransitionPage(
                         gameState: widget.gameState,
-                      )));
+                      )),
+              ModalRoute.withName('/'));
         } else {
           setState(() {
             _start--;
@@ -369,10 +372,11 @@ class _TimerWidgetState extends State<TimerWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+        height: 30,
+        width: 70,
         decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(10),
             boxShadow: const [
               BoxShadow(
                 color: Colors.grey,

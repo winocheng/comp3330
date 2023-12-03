@@ -39,3 +39,41 @@ class CirclePainter extends CustomPainter {
     return true;
   }
 }
+
+class ExitDialogBuilder {
+  final BuildContext context;
+  const ExitDialogBuilder(this.context);
+
+  Future<bool> build() async {
+    return (await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Quit?'),
+              content: const Text('Do you want to exit the current game?'),
+              actions: <Widget>[
+                TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  child: const Text('No'),
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  child: const Text('Yes'),
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                ),
+              ],
+            );
+          },
+        )) ??
+        false;
+  }
+}

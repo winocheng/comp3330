@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/services.dart';
 import 'package:hku_guesser/constants.dart';
 import 'package:hku_guesser/game_start.dart';
 import 'package:hku_guesser/ranking.dart';
 import 'package:hku_guesser/question_database.dart';
 import 'package:hku_guesser/camera.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(const HKUGuesserApp());
 }
 
