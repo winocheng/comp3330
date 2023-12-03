@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import 'package:flutter/services.dart';
 
 Future<String> saveImageToStorageFromAssets(String assetPath, var n) async {
@@ -13,7 +13,7 @@ Future<String> saveImageToStorageFromAssets(String assetPath, var n) async {
     await newImageFile.writeAsBytes(byteData.buffer.asUint8List());
     return imagePath;
   } catch (e) {
-    print('Failed to save image to storage: $e');
+    // print('Failed to save image to storage: $e');
     return '';
   }
 }
@@ -26,7 +26,7 @@ Future<String> saveImageToStorageFromBytes(String byteB64, String name) async {
     await newImageFile.writeAsBytes(base64Decode(byteB64));
     return imagePath;
   } catch (e) {
-    print('Failed to save image to storage: $e');
+    // print('Failed to save image to storage: $e');
     return '';
   }
 }

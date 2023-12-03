@@ -35,15 +35,17 @@ class _TransitionPageState extends State<TransitionPage> {
   }
 }
 
+
 class Transition extends StatelessWidget {
   final GameState gameState;
   const Transition({Key? key, required this.gameState}) : super(key: key);
 
   void nextRound(BuildContext context) {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (context) => GamePage(gameState: gameState)));
+            builder: (context) => GamePage(gameState: gameState)),
+        ModalRoute.withName('/'));
   }
 
   @override
@@ -54,52 +56,53 @@ class Transition extends StatelessWidget {
           fontFamily: 'Inter',
           height: 0,
         ),
-        child: Container(
-          color: mainColor,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'You score ${gameState.roundScore} this round!\n'
-                'Total score: ${gameState.totalScore}',
-                style: TextStyle(fontSize: 25),
-                textAlign: TextAlign.center,
-              ),
-              MapLocation(q: gameState.questions[gameState.roundNum - 2]),
-              Text(
-                'Round ${gameState.roundNum} starts in:',
-                style: TextStyle(fontSize: 25),
-                textAlign: TextAlign.center,
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 15),
-                child: SizedBox(
-                  width: 177,
-                  height: 177,
-                  child: Countdown(
-                    duration: gameState.transitionTime,
-                    nextRound: nextRound,
+        child: WillPopScope(
+            onWillPop: ExitDialogBuilder(context).build,
+            child: Container(
+              color: mainColor,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'You score ${gameState.roundScore} this round!\n'
+                    'Total score: ${gameState.totalScore}',
+                    style: const TextStyle(fontSize: 25),
+                    textAlign: TextAlign.center,
                   ),
-                ),
+                  MapLocation(q: gameState.questions[gameState.roundNum - 2]),
+                  Text(
+                    'Round ${gameState.roundNum} starts in:',
+                    style: const TextStyle(fontSize: 25),
+                    textAlign: TextAlign.center,
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 15),
+                    child: SizedBox(
+                      width: 177,
+                      height: 177,
+                      child: Countdown(
+                        duration: gameState.transitionTime,
+                        nextRound: nextRound,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    onPressed: () {
+                      nextRound(context);
+                    },
+                    child: const Text(
+                      "Next Question",
+                      style: TextStyle(color: fontColor, fontSize: 20),
+                    ),
+                  ),
+                ],
               ),
-              TextButton(
-                child: Text(
-                  "Next Question",
-                  style: TextStyle(color: fontColor, fontSize: 20),
-                ),
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.green,
-                ),
-                onPressed: () {
-                  print("Next round");
-                  nextRound(context);
-                },
-              ),
-            ],
-          ),
-        ));
+            )));
   }
 }
 
@@ -122,7 +125,7 @@ class _CountdownState extends State<Countdown> {
     super.initState();
     _myDuration = Duration(seconds: widget.duration);
     countdownTimer =
-        Timer.periodic(Duration(seconds: 1), (_) => setCountDown());
+        Timer.periodic(const Duration(seconds: 1), (_) => setCountDown());
   }
 
   @override
@@ -147,12 +150,12 @@ class _CountdownState extends State<Countdown> {
   Widget build(BuildContext context) {
     final seconds = _myDuration.inSeconds.toString();
     return Stack(
-      alignment: Alignment(0, -0.3),
+      alignment: const Alignment(0, -0.3),
       children: [
         Image.asset('assets/images/location.png'),
         Text(
             seconds,
-            style: TextStyle(
+          style: const TextStyle(
               fontSize: 60,
               fontWeight: FontWeight.w700,
             ),
@@ -173,27 +176,28 @@ class Result extends StatelessWidget {
     final resultText = gameState.gameType == GameState.general
         //  Normal game finished text
         ? <Widget>[
-            Text('Game Finished!',
+            const Text('Game Finished!',
                 style: TextStyle(
                     fontFamily: 'LuckiestGuy',
                     color: highlightColor1,
                     fontSize: 45)),
             Text('You scored ${gameState.roundScore} this round!',
-                style: TextStyle(fontSize: 22, height: 2)),
+                style: const TextStyle(fontSize: 22, height: 2)),
             MapLocation(q: gameState.questions[gameState.roundNum - 2]),
             Text(
                 'In ${gameState.totalRound} rounds, you scored ${gameState.totalScore}!',
-                style: TextStyle(fontSize: 22)),
+                style: const TextStyle(fontSize: 22)),
           ]
         //  Daily challenge finished text
         : <Widget>[
-            Text('You have completed the daily challenge!',
+            const Text('You have completed\nthe daily challenge!',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                     fontFamily: 'LuckiestGuy',
                     color: highlightColor1,
-                    fontSize: 30)),
+                    fontSize: 32)),
             Text('You scored ${gameState.totalScore}!',
-                style: TextStyle(fontSize: 22, height: 2)),
+                style: const TextStyle(fontSize: 22, height: 2)),
             MapLocation(q: gameState.questions[gameState.roundNum - 2]),
           ];
 
@@ -212,41 +216,32 @@ class Result extends StatelessWidget {
                 children: [
                   ...resultText,
                   Container(
-                    margin: EdgeInsets.only(top: 50),
+                      margin: const EdgeInsets.only(top: 50),
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             TextButton(
-                              child: Text(
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.all(5.0),
+                                backgroundColor: Colors.green,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text(
                                 "Return",
                                 style:
                                     TextStyle(color: fontColor, fontSize: 20),
                               ),
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.all(5.0),
-                                backgroundColor: Colors.green,
-                              ),
-                              onPressed: () {
-                                print("Quit");
-                                Navigator.pop(context);
-                              },
                             ),
-                            SizedBox(
-                              width: 20.0,
-                            ),
+                            const SizedBox(width: 20.0),
                             TextButton(
-                                child: Text(
-                                  "Upload my score",
-                                  style:
-                                      TextStyle(color: fontColor, fontSize: 20),
-                                ),
                                 style: TextButton.styleFrom(
-                                  padding: EdgeInsets.all(5.0),
+                                  padding: const EdgeInsets.all(5.0),
                                   backgroundColor: Colors.green,
                                 ),
                                 onPressed: () {
-                                  print("Upload score");
-                            _rankingDialogBuilder(context).then((name) {
+                                  _rankingDialogBuilder(context).then((name) {
                                     if (name == null) {
                                       return;
                                     }
@@ -258,47 +253,16 @@ class Result extends StatelessWidget {
                                                 name: name,
                                                 score: gameState.totalScore)));
                                   });
-                                }
-                        ),
+                                },
+                                child: const Text(
+                                  "Upload my score",
+                                  style:
+                                      TextStyle(color: fontColor, fontSize: 20),
+                                )),
                           ])
                   ),
                 ])));
   }
-
-  // Future<bool?> _exitDialogBuilder(BuildContext context) {
-  //   return showDialog<bool>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text('Ranking'),
-  //         content: const Text(
-  //           'Do you want to upload your score?\n'
-  //           'You can see how well you performed against other players!',
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             style: TextButton.styleFrom(
-  //               textStyle: Theme.of(context).textTheme.labelLarge,
-  //             ),
-  //             child: const Text('No'),
-  //             onPressed: () {
-  //               Navigator.pop(context, false);
-  //             },
-  //           ),
-  //           TextButton(
-  //             style: TextButton.styleFrom(
-  //               textStyle: Theme.of(context).textTheme.labelLarge,
-  //             ),
-  //             child: const Text('Yes'),
-  //             onPressed: () {
-  //               Navigator.pop(context, true);
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   Future<String?> _rankingDialogBuilder(BuildContext context) {
     TextEditingController textController = TextEditingController();
@@ -330,39 +294,18 @@ class Result extends StatelessWidget {
       },
     );
   }
-
 }
 
-class MapLocation extends StatefulWidget {
+
+class MapLocation extends StatelessWidget {
   final Question q;
-  const MapLocation({Key? key, required this.q}) : super(key: key);
+  MapLocation({Key? key, required this.q}) : super(key: key);
 
-  @override
-  State<MapLocation> createState() => _MapLocationState();
-}
-
-class _MapLocationState extends State<MapLocation> {
   final width = 500; // Width of the crop region
   final height = 500; // Height of the crop region
-  late double x, y;
   final GlobalKey _boxKey = GlobalKey();
 
-  img.Image? croppedImage;
-  CirclePainter? circleDot;
-
-  @override
-  void initState() {
-    super.initState();
-    var jsonData = jsonDecode(widget.q.jsonText);
-    x = jsonData['x-coordinate'];
-    y = jsonData['y-coordinate'];
-    cropImage();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      paintCircle();
-    });
-  }
-
-  Future<void> cropImage() async {
+  Future<img.Image> _cropImage(double x, double y) async {
     int toPosInt(double n) => n < 0 ? 0 : n.toInt();
 
     List<int> imageBytes = await rootBundle
@@ -373,12 +316,10 @@ class _MapLocationState extends State<MapLocation> {
 
     int dx = toPosInt(x - width / 2);
     int dy = toPosInt(y - height / 2);
-    croppedImage = img.copyCrop(originalImage!, dx, dy, width, height);
-
-    setState(() {});
+    return img.copyCrop(originalImage!, dx, dy, width, height);
   }
 
-  void paintCircle() {
+  CirclePainter paintCircle(double x, double y) {
     final RenderBox renderBox =
         _boxKey.currentContext!.findRenderObject() as RenderBox;
     double toOffset(double n, double dn) => n - dn < 0 ? n : dn;
@@ -386,24 +327,35 @@ class _MapLocationState extends State<MapLocation> {
     double dx = toOffset(x, width / 2) * renderBox.size.width / width;
     double dy = toOffset(y, height / 2) * renderBox.size.height / height;
 
-    setState(() {
-      circleDot = CirclePainter(dx, dy);
-    });
+    return CirclePainter(dx, dy);
   }
 
   @override
   Widget build(BuildContext context) {
+    final jsonData = jsonDecode(q.jsonText);
+    final x = jsonData['x-coordinate'];
+    final y = jsonData['y-coordinate'];
     return Container(
-        margin: EdgeInsets.symmetric(vertical: 20),
+        margin: const EdgeInsets.symmetric(vertical: 20),
         child: SizedBox(
             key: _boxKey,
             width: 250,
             height: 250,
-            child: CustomPaint(
-                foregroundPainter: circleDot,
-                child: croppedImage != null
-                    ? Image.memory(
-                        Uint8List.fromList(img.encodeJpg(croppedImage!)))
-                    : CircularProgressIndicator())));
+            child: FutureBuilder<img.Image>(
+                future: _cropImage(x, y),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasData) {
+                    return CustomPaint(
+                        foregroundPainter: paintCircle(x, y),
+                        child: Image.memory(
+                            Uint8List.fromList(img.encodeJpg(snapshot.data!))));
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                })));       
   }
 }

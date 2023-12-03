@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:hku_guesser/game_state.dart';
 
@@ -24,7 +22,7 @@ class QuestionDatabase {
     // If the database file exists, delete it
     if (databaseExists) {
       await deleteDatabase(path);
-      print("deleted!");
+      // print("Deleted");
     }
     
     return await openDatabase(

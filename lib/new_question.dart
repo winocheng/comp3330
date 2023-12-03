@@ -1,17 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:hku_guesser/constants.dart';
 import 'package:hku_guesser/image.dart';
+import 'package:hku_guesser/question_database.dart';
 import 'package:hku_guesser/sync_db.dart';
 import 'package:image_picker/image_picker.dart';
-import 'constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:hku_guesser/question_database.dart';
 
 class CreateQuestion extends StatelessWidget {
   final XFile image;
-
   const CreateQuestion({super.key, required this.image});
 
   @override
@@ -21,9 +21,7 @@ class CreateQuestion extends StatelessWidget {
         title: const Text('Create New Question'),
       ),
       body: Center(
-        child: Container(
-          child: NewAnswerPage(image: image),
-        ),
+        child: NewAnswerPage(image: image)
       ),
     );
   }
@@ -60,8 +58,7 @@ class _AnswerPageState extends State<NewAnswerPage> {
 
   @override
   Widget build(BuildContext context) {
-
-    const List<(String, int)> floor_options = [
+    const List<(String, int)> floorOptions = [
       ("G/F", 0),
       ("1/F", 1),
       ("2/F", 2),
@@ -70,9 +67,7 @@ class _AnswerPageState extends State<NewAnswerPage> {
       ("5/F+", 5),
     ];
 
-    var image = Image.asset('assets/images/hku_image.jpg');
-
-    print("x: " + x.toString() + " y: " + y.toString());
+    // print('x: ${playerAnswer.x}, y: ${playerAnswer.y}');
     return Stack(
       children: <Widget>[
         InteractiveViewer(
@@ -87,12 +82,11 @@ class _AnswerPageState extends State<NewAnswerPage> {
                 x = details.localPosition.dx;
                 y = details.localPosition.dy;
               });
-              print("x: " + x.toString() + " y: " + y.toString());
-              print(viewTransformationController.value);
+              // print(viewTransformationController.value);
             },
             child: CustomPaint(
               foregroundPainter: CirclePainter(x, y),
-              child: image,
+              child: Image.asset('assets/images/hku_image.jpg'),
             ),
           ),
         ),
@@ -122,8 +116,8 @@ class _AnswerPageState extends State<NewAnswerPage> {
                         child: DropdownButton(
                           isDense: true,
                           borderRadius: BorderRadius.circular(5),
-                          value: floor_options[floor].$2,
-                          items: floor_options
+                          value: floorOptions[floor].$2,
+                          items: floorOptions
                               .map((value) {
                                 return DropdownMenuItem<int>(
                                   value: value.$2,
@@ -178,7 +172,7 @@ class _AnswerPageState extends State<NewAnswerPage> {
                               final check = await QuestionDatabase.instance.getQuestions();
 
                               if (check.isEmpty) {
-                                await initailize_question();
+                                await initQuestion();
                               } else {
                                 await updateQuestion();
                               }
@@ -187,7 +181,8 @@ class _AnswerPageState extends State<NewAnswerPage> {
                                 Uri.parse("$serverIP/create_question"),
                                 headers: {'Content-Type': 'application/json'},
                                 body: jsonEncode(data)
-                              );
+                              )
+                                  .timeout(const Duration(seconds: 5));
 
                               if (response.statusCode == 200) {
                                 final String qid = json.decode(response.body)["id"];

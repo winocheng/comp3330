@@ -12,7 +12,7 @@ class LoadingPage extends StatelessWidget {
     final check = await QuestionDatabase.instance.getQuestions();
 
     if (check.isEmpty) {
-      await initailize_question();
+      await initQuestion();
     } else {
       await updateQuestion();
     }
@@ -24,8 +24,15 @@ class LoadingPage extends StatelessWidget {
 
   Future<List<Question>> _loadDaily() async {
     final question = await getDailyQuestion();
-    assert(question != null, "Failed to get daily challenge question");
-    return question!;
+    if (question == null) {
+      var loadedQuestions = await QuestionDatabase.instance.getQuestions();
+      if (loadedQuestions.isEmpty) {
+        await initQuestion();
+        loadedQuestions = await QuestionDatabase.instance.getQuestions();
+      }
+      return [loadedQuestions[0]];
+    }
+    return question;
   }
 
   @override
@@ -71,9 +78,9 @@ class LoadingPage extends StatelessWidget {
   }
 
   Widget _buildLoadingWidget() {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator()
       )
     );
     
@@ -83,7 +90,7 @@ class LoadingPage extends StatelessWidget {
   Widget _buildErrorWidget(String error) {
     return Scaffold(
       body: Center(
-        child: Text('Error: $error'),
+        child: Text('Error: $error')
       )
     );
   }
